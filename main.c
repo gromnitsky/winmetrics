@@ -97,19 +97,27 @@ readline() {
   return line;
 }
 
+double
+font_size(LOGFONTW *lf) {
+  HDC hdc = GetDC(GetDesktopWindow());
+  DWORD logpixelsy = GetDeviceCaps(hdc, LOGPIXELSY);
+  ReleaseDC(GetDesktopWindow(), hdc);
+
+  return -(lf->lfHeight * 72.0) / logpixelsy;
+}
+
 
 
 int main(int argc, char **argv) {
   char *logfontw, *line = readline();
-  int height, weight;
-  if (3 != sscanf(line, "%ms %d %d", &logfontw, &height, &weight))
-    errx(1, "expected format: LOGFONTW height weight");
+  if (1 != sscanf(line, "%m[A-F0-9]", &logfontw))
+    errx(1, "expected format: [A-F0-9]+");
   free(line);
 
   LOGFONTW *lf = (LOGFONTW*)hex2bin(logfontw);
   if (!dlg_font(lf)) exit(1);
 
-  printf("%s %d %d\n", logfont2hex(lf), height, weight);
+  printf("%s %f\n", logfont2hex(lf), font_size(lf));
   dlog("%s", logfont2str(lf));
 
   return 0;
