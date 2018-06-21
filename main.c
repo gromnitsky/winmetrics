@@ -71,7 +71,7 @@ char *
 logfont2str(LOGFONTW *lf) {
   int dest_len = 10*13 + LF_FACESIZE + 1;
   char *dest = malloc(dest_len);
-  snprintf(dest, dest_len, "%d,%d,%d,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%ls",
+  snprintf(dest, dest_len, "%ld,%ld,%ld,%ld,%ld,%u,%u,%u,%u,%u,%u,%u,%u,%ls",
 	   lf->lfHeight,
 	   lf->lfWidth,
 	   lf->lfEscapement,
