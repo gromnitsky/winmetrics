@@ -1,21 +1,8 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <libgen.h>
 #include <stdbool.h>
+#include <err.h>
 
 #include <windows.h>
-
-void
-errx(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  char s[BUFSIZ];
-
-  vsnprintf(s, BUFSIZ, fmt, ap);
-  MessageBox(NULL, s, "winmetrics error", MB_OK | MB_ICONSTOP);
-  exit(1);
-}
 
 void
 dlog(char *fmt, ...) {
@@ -102,16 +89,27 @@ logfont2str(LOGFONTW *lf) {
     return dest;
 }
 
+char*
+readline() {
+  char *line = NULL;
+  size_t line_len = 0;
+  if (-1 == getline(&line, &line_len, stdin)) err(1, "getline failure");
+  return line;
+}
+
 
 
 int main(int argc, char **argv) {
-  if (argc != 4) errx("Usage: %s logfont height width", basename(argv[0]));
+  char *logfontw, *line = readline();
+  int height, weight;
+  if (3 != sscanf(line, "%ms %d %d", &logfontw, &height, &weight))
+    errx(1, "expected format: LOGFONTW height weight");
+  free(line);
 
-  LOGFONTW *lf = (LOGFONTW*)hex2bin(argv[1]);
+  LOGFONTW *lf = (LOGFONTW*)hex2bin(logfontw);
   if (!dlg_font(lf)) exit(1);
 
-  //fwrite(&lf, 1, sizeof(lf), stdout);
-  printf("%s\n", logfont2hex(lf));
+  printf("%s %d %d\n", logfont2hex(lf), height, weight);
   dlog("%s", logfont2str(lf));
 
   return 0;
