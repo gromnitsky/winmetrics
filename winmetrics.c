@@ -30,27 +30,27 @@ dlog(char *fmt, ...) {
 }
 
 bool
-dlg_font(LOGFONT *logfont) {
-  CHOOSEFONT cf;
+dlg_font(LOGFONTW *logfont) {
+  CHOOSEFONTW cf;
   ZeroMemory(&cf, sizeof(CHOOSEFONT));
   cf.lStructSize = sizeof(CHOOSEFONT); // coredumps if unset
   cf.lpLogFont = logfont;
   cf.hwndOwner = NULL; // exits immediately if unset
   cf.Flags = CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_NOSCRIPTSEL;
-  return ChooseFont(&cf);
+  return ChooseFontW(&cf);
 }
 
-char*
-logfont2hex(LOGFONT *logfont) {
-  size_t src_len = sizeof(LOGFONT);
-  unsigned char raw[src_len];
+BYTE*
+logfont2hex(LOGFONTW *logfont) {
+  size_t src_len = sizeof(LOGFONTW);
+  BYTE raw[src_len];
   memset(raw, 0x00, src_len);
   memcpy(raw, logfont, src_len);
 
   size_t dest_len = src_len*2 + 1;
   char *hexx = "0123456789ABCDEF";
 
-  char *dest = malloc(dest_len);
+  BYTE *dest = malloc(dest_len);
   dest[0] = '\0';
 
   for (size_t idx = 0; idx < src_len; idx++) {
@@ -81,11 +81,10 @@ hex2bin(char *src) {
 }
 
 char *
-logfont2str(LOGFONT *lf) {
-  static const char template[] = "%d,%d,%d,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%s";
+logfont2str(LOGFONTW *lf) {
   int dest_len = 10*13 + LF_FACESIZE + 1;
   char *dest = malloc(dest_len);
-  snprintf(dest, dest_len, template,
+  snprintf(dest, dest_len, "%d,%d,%d,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%ls",
 	   lf->lfHeight,
 	   lf->lfWidth,
 	   lf->lfEscapement,
@@ -108,7 +107,7 @@ logfont2str(LOGFONT *lf) {
 int main(int argc, char **argv) {
   if (argc != 4) errx("Usage: %s logfont height width", basename(argv[0]));
 
-  LOGFONT *lf = (LOGFONT*)hex2bin(argv[1]);
+  LOGFONTW *lf = (LOGFONTW*)hex2bin(argv[1]);
   if (!dlg_font(lf)) exit(1);
 
   //fwrite(&lf, 1, sizeof(lf), stdout);
