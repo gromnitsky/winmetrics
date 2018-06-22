@@ -12,6 +12,16 @@
   img { max-width: 100%; }
 </style>
 
-<h1>Hello</h1>
+<a href="#" id="exit">Exit</a>
 
-<script src="main.js"></script>
+<script>
+  document.querySelector('#exit').onclick = function() {
+      fetch('/cgi-bin/exit').then( r => r.text()).then( () => {
+	  document.querySelector('body').innerHTML = `
+<h1>Server has exited. Please close this tab.</h1>
+`
+      })
+      return false
+  }
+</script>
+<script src="web.js"></script>

@@ -4,7 +4,7 @@
 
 let http = require('http')
 let url = require('url')
-let {spawn} = require('child_process')
+let child_process = require('child_process')
 let path = require('path')
 let fs = require('fs')
 
@@ -12,7 +12,7 @@ let mime = require('mime')
 
 let run = function(name, args = [], stdin_input) {
     return new Promise( (resolve, reject) => {
-	let cmd = spawn(name, args)
+	let cmd = child_process.spawn(name, args)
 
 	cmd.on('error', err => {
 	    reject(err)
@@ -70,7 +70,11 @@ let server = http.createServer(async function (req, res) {
     }
 
     let u = url.parse(req.url, true)
-    if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
+    if (req.method === "GET" && u.pathname === '/cgi-bin/exit') {
+	log(0, 'cheerio')
+	res.end()
+	process.exit(0)
+    } else if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
 	let r = await run('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])
 	res.setHeader('Content-Type', 'application/json')
 	res.end(JSON.stringify(reg_parse(r)))
@@ -106,4 +110,12 @@ let server = http.createServer(async function (req, res) {
 })
 
 
-server.listen(process.env.WINMETRICS_PORT || 8765)
+server.listen(process.env.WINMETRICS_PORT || 8765, () => {
+    let url = `http://127.0.0.1:${server.address().port}/`
+    console.error(url)
+    if (process.env.WINMETRICS_BROWSER) child_process.exec(`start ${url}`)
+})
+server.on('error', e => {
+    console.error(`Error: ${e.message}`)
+    process.exit(e.code === 'EADDRINUSE' ? 2 : 1)
+})
