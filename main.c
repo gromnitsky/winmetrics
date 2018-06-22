@@ -23,7 +23,7 @@ dlg_font(LOGFONTW *logfont) {
   cf.lStructSize = sizeof(CHOOSEFONT); // coredumps if unset
   cf.lpLogFont = logfont;
   cf.hwndOwner = NULL; // exits immediately if unset
-  cf.Flags = CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_NOSCRIPTSEL;
+  cf.Flags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_NOSCRIPTSEL;
   return ChooseFontW(&cf);
 }
 
