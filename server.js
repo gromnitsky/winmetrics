@@ -59,7 +59,7 @@ process.chdir(process.argv[2])
 let public_root = fs.realpathSync(process.cwd())
 
 let server = http.createServer(async function (req, res) {
-    let log = console.error.bind(console, `${req.url}:`, 'error:')
+    let log = console.error.bind(console, `${req.method} ${req.url}:`)
     let err = (code, msg) => {
 	try { res.statusCode = code } catch (e) { log(code, e.message) }
 	log(code, msg || '')
@@ -74,15 +74,16 @@ let server = http.createServer(async function (req, res) {
 	log('cheerio')
 	res.end()
 	process.exit(0)
+
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
-	let r = await run('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])
+	let r = await run_safely('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])
+	if (!r) return
 	res.setHeader('Content-Type', 'application/json')
 	res.end(JSON.stringify(reg_parse(r)))
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/choosefont') {
 	res.setHeader('Content-Type', 'text/plain')
-	let r = await run_safely('cgi-bin/choosefont', [], "FIXME")
-	res.end(r)
+	res.end(await run_safely('cgi-bin/choosefont', [], "FIXME"))
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/dpi') {
 	res.setHeader('Content-Type', 'text/plain')
