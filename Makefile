@@ -12,12 +12,19 @@ CFLAGS := -Wall
 
 mkdir = @mkdir -p $(dir $@)
 
-all: $(addprefix $(cgi-bin)/, choosefont cygwin1.dll) \
+all: $(addprefix $(cgi-bin)/, choosefont dpi cygwin1.dll) \
 	$(addprefix $(app)/, $(wildcard index.* web.js))
 
+define link =
+$(mkdir)
+$(LINK.c) $^ -o $@
+endef
+
 $(cgi-bin)/choosefont: $(cache)/choosefont.o
-	$(mkdir)
-	$(LINK.c) $^ -o $@
+	$(link)
+
+$(cgi-bin)/dpi: $(cache)/dpi.o
+	$(link)
 
 $(cache)/%.o: %.c
 	$(mkdir)

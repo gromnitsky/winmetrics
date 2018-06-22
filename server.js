@@ -10,7 +10,7 @@ let fs = require('fs')
 
 let mime = require('mime')
 
-let run = function(name, args, stdin_input) {
+let run = function(name, args = [], stdin_input) {
     return new Promise( (resolve, reject) => {
 	let cmd = spawn(name, args)
 
@@ -72,11 +72,17 @@ let server = http.createServer(async function (req, res) {
     let u = url.parse(req.url, true)
     if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
 	let r = await run('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])
+	res.setHeader('Content-Type', 'application/json')
 	res.end(JSON.stringify(reg_parse(r)))
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/choosefont') {
+	res.setHeader('Content-Type', 'text/plain')
 	let r = await run_safely('cgi-bin/choosefont', [], "FIXME")
 	res.end(r)
+
+    } else if (req.method === "GET" && u.pathname === '/cgi-bin/dpi') {
+	res.setHeader('Content-Type', 'text/plain')
+	res.end(await run_safely('cgi-bin/dpi'))
 
     } else if (req.method === "GET" && !/^\/cgi-bin/.test(u.pathname)) {
 	if (/^\/+$/.test(u.pathname)) u.pathname = '/index.html'
