@@ -71,7 +71,7 @@ let server = http.createServer(async function (req, res) {
 
     let u = url.parse(req.url, true)
     if (req.method === "GET" && u.pathname === '/cgi-bin/exit') {
-	log(0, 'cheerio')
+	log('cheerio')
 	res.end()
 	process.exit(0)
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {

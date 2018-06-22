@@ -20,10 +20,7 @@ $(mkdir)
 $(LINK.c) $^ -o $@
 endef
 
-$(cgi-bin)/choosefont: $(cache)/choosefont.o
-	$(link)
-
-$(cgi-bin)/dpi: $(cache)/dpi.o
+$(cgi-bin)/%: $(cache)/%.o
 	$(link)
 
 $(cache)/%.o: %.c

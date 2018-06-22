@@ -5,10 +5,13 @@ var sh = WScript.CreateObject("WScript.Shell")
 
 var env = sh.Environment("Process")
 var port = env("WINMETRICS_PORT") || 8765
-env("WINMETRICS_BROWSER") = "1" // jscript is bizarre
 var cmd = 'node server.js _out.i686-pc-cygwin/app'
 
-var code = sh.Run(cmd, 1, true)
+// this is not a syntax error! this is jscript! see
+// https://stackoverflow.com/q/18838213
+env("WINMETRICS_BROWSER") = "1"
+// `0` means hide the console win, `true` that the op is sync
+var code = sh.Run(cmd, 0, true)
 
 if (code === 2) {
     errx("The app is already running on port " + port
