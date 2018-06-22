@@ -5,7 +5,10 @@
 let http = require('http')
 let url = require('url')
 let {spawn} = require('child_process')
-let util = require('util')
+let path = require('path')
+let fs = require('fs')
+
+let mime = require('mime')
 
 let run = function(name, args, stdin_input) {
     return new Promise( (resolve, reject) => {
@@ -53,6 +56,7 @@ if (process.argv.length < 3) {
     process.exit(1)
 }
 process.chdir(process.argv[2])
+let public_root = fs.realpathSync(process.cwd())
 
 let server = http.createServer(async function (req, res) {
     let log = console.error.bind(console, `${req.url}:`, 'error:')
@@ -69,9 +73,28 @@ let server = http.createServer(async function (req, res) {
     if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
 	let r = await run('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])
 	res.end(JSON.stringify(reg_parse(r)))
+
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/choosefont') {
 	let r = await run_safely('winmetrics', [], "FIXME")
 	res.end(r)
+
+    } else if (req.method === "GET" && !/^\/cgi-bin/.test(u.pathname)) {
+	if (/^\/+$/.test(u.pathname)) u.pathname = '/index.html'
+	let fname = path.join(public_root, path.normalize(u.pathname))
+
+	fs.stat(fname, (e, stats) => {
+	    if (e) {
+		err(404, `${e.syscall} ${e.code}`)
+		return
+	    }
+	    res.setHeader('Content-Length', stats.size)
+	    res.setHeader('Content-Type', mime.getType(fname))
+	    let stream = fs.createReadStream(fname)
+	    stream.on('error', e => {
+		err(500, `${err.syscall} ${e.code}`)
+	    })
+	    stream.pipe(res)
+	})
     } else
 	err(400)
 })
