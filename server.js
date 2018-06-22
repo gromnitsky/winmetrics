@@ -75,7 +75,7 @@ let server = http.createServer(async function (req, res) {
 	res.end(JSON.stringify(reg_parse(r)))
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/choosefont') {
-	let r = await run_safely('winmetrics', [], "FIXME")
+	let r = await run_safely('cgi-bin/choosefont', [], "FIXME")
 	res.end(r)
 
     } else if (req.method === "GET" && !/^\/cgi-bin/.test(u.pathname)) {

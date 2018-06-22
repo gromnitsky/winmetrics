@@ -6,10 +6,10 @@
 
 void
 dlog(char *fmt, ...) {
-  if (!getenv("WINMETRICS_DEBUG")) return;
+  if (!getenv("CHOOSEFONT_DEBUG")) return;
 
   va_list ap;
-  fprintf(stderr, "winmetrics: ");
+  fprintf(stderr, "choosefont: ");
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
