@@ -20,3 +20,11 @@ $(out)/%.o: %.c
 
 $(out)/cygwin1.dll:
 	cp /cygdrive/c/cygwin/bin/cygwin1.dll $@
+
+
+
+server: kill
+	node server.js $(out) &
+
+kill:
+	-pkill -f 'node.exe. server.js'
