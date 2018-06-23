@@ -50,6 +50,13 @@ let reg_parse = function(str) {
 			 }))
 }
 
+let reg_add = async function(query) {
+    query = JSON.parse(query)
+    return run('reg', ['add', 'HKCU\\Control Panel\\Desktop\\WindowMetrics',
+		       '/f',
+		       '/v', query.key, '/t', query.type, '/d', query.val])
+}
+
 
 if (process.argv.length < 3) {
     console.error("Usage: server.js public_dir")
@@ -80,6 +87,18 @@ let server = http.createServer(async function (req, res) {
 	if (!r) return
 	res.setHeader('Content-Type', 'application/json')
 	res.end(JSON.stringify(reg_parse(r)))
+
+    } else if (req.method === "PUT" && u.pathname === '/cgi-bin/registry/set') {
+	// expect application/x-ndjson
+	let data = []
+	req.on('data', chunk => data.push(chunk))
+	req.on('error', e => err(500, e.message))
+	req.on('end', () => {
+	    // wait for all registry writes, only then respond
+	    Promise.all(data.join('').split("\n").map( line => reg_add(line)))
+		.then( () => res.end())
+		.catch( e => err(500, e.message))
+	})
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/choosefont') {
 	res.setHeader('Content-Type', 'text/plain')
