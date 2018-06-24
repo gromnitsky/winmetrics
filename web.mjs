@@ -21,11 +21,12 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     let css = new CSS()
 
-    let frame = new Frame($('#preview'), 0,0, 'w-frame')
+    let frame = new Frame($('#preview'), 0,0)
+    let menu = new Menu(frame, 0, 20, css)
+
     frame.draw()
-    let menu = new Menu(frame, 0, 20, 'w-menu', css)
+    menu.moveto(10,10)
     menu.draw()
-    menu.font('Arial Black', 900, '255', 12.4)
 })
 
 function $(query) {
@@ -68,35 +69,30 @@ class CSS {
 }
 
 class Widget {
-    constructor(parent, x,y, klass, css) {
+    constructor(parent, x,y, css) {
 	this.parent = parent
 	this.x = x
 	this.y = y
-	this.klass = klass
 	this.css = css
 	this.id = 'widget-' + Math.random().toString(36).substring(2,7)
 
 	this._node = document.createElement('div')
 	this._node.id = this.id
-	this._node.className = this.klass
 	this._node.style.position = 'relative'
-	this._node.style.top = `${y}px`
-	this._node.style.left = `${x}px`
     }
 
-    draw() { this.redraw(this.node()) }
+    moveto(x,y) { [this.x, this.y] = [x,y] }
 
-    node() { return $(`${this.id}`) || this._node }
+    node() { return $(`#${this.id}`) || this._node }
 
-    redraw(node) {
-	let old = $(`${this.id}`)
-	if (old) {
-	    console.log('replace')
-	    old.parentNode.replaceChild(node, old)
-	} else {
+    draw() {
+	if (!$(`#${this.id}`)) {
+	    this._node.className = this.klass
 	    let parent = this.parent instanceof Widget ? this.parent.node() : this.parent
-	    parent.appendChild(node)
+	    parent.appendChild(this._node)
 	}
+	this.node().style.left = `${this.x}px`
+	this.node().style.top = `${this.y}px`
     }
 
     css_rule(name) {
@@ -105,17 +101,35 @@ class Widget {
     }
 }
 
-class Frame extends Widget {}
+class Frame extends Widget {
+    constructor(parent, x,y) {
+	super(parent, x,y)
+	this.klass = 'w-frame'
+    }
+}
 
 class Menu extends Widget {
-    font(name, weight, is_italic, size) {
-	let r = this.css_rule('.w-menu__topitem')
-	r.style.fontFamily = name
-	r.style.fontWeight = weight
-	if (Number(is_italic)) r.style.fontStyle = 'italic'
-	r.style.fontSize = `${size}pt`
+    constructor(parent, x,y, css) {
+	super(parent, x,y, css)
+	this.klass = 'w-menu'
+	this.conf = {
+	    font: {
+		name: 'Comic Sans MS',
+		weight: '700',
+		italic: '255',
+		size: '16.0'
+	    }
+	}
+    }
+    font_update() {
+	let r = this.css_rule(`.${this.klass}__topitem`)
+	r.style.fontFamily = this.conf.font.name
+	r.style.fontWeight = this.conf.font.weight
+	if (Number(this.conf.font.italic)) r.style.fontStyle = 'italic'
+	r.style.fontSize = `${this.conf.font.size}pt`
     }
     draw() {
+	super.draw()
 	let node = this.node()
 	let k = `${this.klass}__topitem`
 	node.innerHTML = `<span class='${k}'>File</span><span class='${k}'>Edit</span><span class='${k}'>Format</span><span class='${k}'>View</span><span class='${k} ${k}--selected'>Help</span>
@@ -123,6 +137,6 @@ class Menu extends Widget {
 <hr>
 
 `
-	this.redraw(node)
+	this.font_update()
     }
 }
