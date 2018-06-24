@@ -25,8 +25,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     let menu = new Menu(frame, 0, 20, css)
 
     frame.draw()
-    menu.moveto(10,10)
     menu.draw()
+
+    menu.controls_draw()
 })
 
 function $(query) {
@@ -43,6 +44,9 @@ class CSS {
 	let node = document.createElement('style')
 	node.id = 'css-global'
 	node.innerHTML = `
+#controls h3 {
+  margin: 0 0 1em;
+}
 .w-frame {
   border: 1px solid #4891b8;
   width: 100%;
@@ -79,6 +83,8 @@ class Widget {
 	this._node = document.createElement('div')
 	this._node.id = this.id
 	this._node.style.position = 'relative'
+
+	this.controls = $('#controls')
     }
 
     moveto(x,y) { [this.x, this.y] = [x,y] }
@@ -113,21 +119,30 @@ class Menu extends Widget {
 	super(parent, x,y, css)
 	this.klass = 'w-menu'
 	this.conf = {
-	    font: {
-		name: 'Comic Sans MS',
-		weight: '700',
-		italic: '255',
-		size: '16.0'
-	    }
+	    logfont: 'F4FFFFFF0000000000000000000000009001000000000001030201225300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000,Segoe UI,400,0,9.000000',
+	    height: 19
 	}
     }
+
+    logfont2css() {
+	let lf = this.conf.logfont.split(',')
+	return { name: lf[1], weight: lf[2], italic: lf[3], size: lf[4] }
+    }
+
+    logfont2human() {
+	let lf = this.conf.logfont.split(',')
+	return `${lf[1]} ${lf[4]}`
+    }
+
     font_update() {
 	let r = this.css_rule(`.${this.klass}__topitem`)
-	r.style.fontFamily = this.conf.font.name
-	r.style.fontWeight = this.conf.font.weight
-	if (Number(this.conf.font.italic)) r.style.fontStyle = 'italic'
-	r.style.fontSize = `${this.conf.font.size}pt`
+	let font = this.logfont2css()
+	r.style.fontFamily = font.name
+	r.style.fontWeight = font.weight
+	r.style.fontStyle = Number(font.italic) ? 'italic' : 'normal'
+	r.style.fontSize = `${font.size}pt`
     }
+
     draw() {
 	super.draw()
 	let node = this.node()
@@ -138,5 +153,29 @@ class Menu extends Widget {
 
 `
 	this.font_update()
+    }
+
+    controls_activate() {
+	$('#controls button').onclick = () => {
+	    fetch('/cgi-bin/choosefont').then( r => r.text())
+		.then( r => {
+		    this.conf.logfont = r.trim()
+		    this.controls_draw()
+		})
+	}
+	$('#controls input').onchange = el => {
+	    this.conf.height = el.target.value
+	    // TODO
+	    this.controls_draw()
+	}
+    }
+
+    controls_draw() {
+	this.controls.innerHTML = `<h3>Menu</h3>
+<p>Font: <button>${this.logfont2human()}</button></>
+<p>Row height: <input type="number" min="0" max="50" value="${this.conf.height}" step="1"> px</p>
+`
+	this.controls_activate()
+	this.draw()
     }
 }
