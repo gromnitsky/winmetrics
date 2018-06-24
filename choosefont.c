@@ -69,9 +69,22 @@ hex2bin(char *src) {
 
 char *
 logfont2str(LOGFONTW *lf) {
-  int dest_len = 10*13 + LF_FACESIZE + 1;
+  int dest_len = BUFSIZ;
   char *dest = malloc(dest_len);
-  snprintf(dest, dest_len, "%ld,%ld,%ld,%ld,%ld,%u,%u,%u,%u,%u,%u,%u,%u,%ls",
+  snprintf(dest, dest_len, "lfHeight=%ld\n"
+	   "\tlfWidth=%ld\n"
+	   "\tlfEscapement=%ld\n"
+	   "\tlfOrientation=%ld\n"
+	   "\tlfWeight=%ld\n"
+	   "\tlfItalic=%d\n"
+	   "\tlfUnderline=%d\n"
+	   "\tlfStrikeOut=%d\n"
+	   "\tlfCharSet=%d\n"
+	   "\tlfOutPrecision=%d\n"
+	   "\tlfClipPrecision=%d\n"
+	   "\tlfQuality=%d\n"
+	   "\tlfPitchAndFamily=%d\n"
+	   "\tlfFaceName=%ls\n",
 	   lf->lfHeight,
 	   lf->lfWidth,
 	   lf->lfEscapement,
@@ -117,7 +130,8 @@ int main(int argc, char **argv) {
   LOGFONTW *lf = (LOGFONTW*)hex2bin(logfontw);
   if (!dlg_font(lf)) exit(1);
 
-  printf("%s %f\n", logfont2hex(lf), font_size(lf));
+  printf("%s,%ls,%d,%d,%f\n", logfont2hex(lf),
+	 lf->lfFaceName, lf->lfWeight, lf->lfItalic, font_size(lf));
   dlog("%s", logfont2str(lf));
 
   return 0;
