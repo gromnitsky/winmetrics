@@ -19,10 +19,13 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     await reg_reload()
 
+    let css = new CSS()
+
     let frame = new Frame($('#preview'), 0,0, 'w-frame')
     frame.draw()
-    let menu = new Menu(frame, 0, 20, 'w-menu')
+    let menu = new Menu(frame, 0, 20, 'w-menu', css)
     menu.draw()
+    menu.font('Arial Black', 900, '255', 12.4)
 })
 
 function $(query) {
@@ -34,29 +37,59 @@ function reg_reload() {
 	.then( r => gstate.registry = r)
 }
 
+class CSS {
+    constructor() {
+	let node = document.createElement('style')
+	node.id = 'css-global'
+	node.innerHTML = `
+.w-frame {
+  border: 1px solid #4891b8;
+  width: 100%;
+  height: 300px;
+}
+
+.w-menu__topitem {
+  margin: 0 5px;
+  padding: 5px;
+}
+.w-menu__topitem--selected {
+  background-color: #cce8ff;
+}
+.w-menu hr {
+  border: 1px solid #f0f0f0;
+  margin: 4px 0 0;
+}
+`
+	document.body.appendChild(node)
+
+	this.node = Array.from(document.styleSheets)
+	    .filter( v => v.ownerNode.id === node.id)[0]
+    }
+}
+
 class Widget {
-    constructor(parent, x,y, klass) {
+    constructor(parent, x,y, klass, css) {
+	this.parent = parent
 	this.x = x
 	this.y = y
 	this.klass = klass
-	this.parent = parent
+	this.css = css
+	this.id = 'widget-' + Math.random().toString(36).substring(2,7)
 
-	let node = document.createElement('style')
-	node.className = 'css-injected'
-	let css = `.${this.klass} {position:relative; top: ${y}px;left:${x}px;}`
-	node.innerHTML = css + "\n" + this.css()
-	document.body.appendChild(node)
+	this._node = document.createElement('div')
+	this._node.id = this.id
+	this._node.className = this.klass
+	this._node.style.position = 'relative'
+	this._node.style.top = `${y}px`
+	this._node.style.left = `${x}px`
     }
-    node() {
-	let old = $(`.${this.klass}`)
-	if (old) return old
 
-	let w = document.createElement('div')
-	w.className = this.klass
-	return w
-    }
+    draw() { this.redraw(this.node()) }
+
+    node() { return $(`${this.id}`) || this._node }
+
     redraw(node) {
-	let old = $(`.${node.className}`)
+	let old = $(`${this.id}`)
 	if (old) {
 	    console.log('replace')
 	    old.parentNode.replaceChild(node, old)
@@ -65,22 +98,23 @@ class Widget {
 	    parent.appendChild(node)
 	}
     }
-    draw() {
-	this.redraw(this.node())
+
+    css_rule(name) {
+	return Array.from(this.css.node.cssRules)
+	    .filter( v => v.selectorText === name)[0]
     }
 }
 
-class Frame extends Widget {
-    css() {
-	return `.${this.klass} {
-  border: 1px solid #4891b8;
-  width: 100%;
-  height: 300px;
-}`
-    }
-}
+class Frame extends Widget {}
 
 class Menu extends Widget {
+    font(name, weight, is_italic, size) {
+	let r = this.css_rule('.w-menu__topitem')
+	r.style.fontFamily = name
+	r.style.fontWeight = weight
+	if (Number(is_italic)) r.style.fontStyle = 'italic'
+	r.style.fontSize = `${size}pt`
+    }
     draw() {
 	let node = this.node()
 	let k = `${this.klass}__topitem`
@@ -90,21 +124,5 @@ class Menu extends Widget {
 
 `
 	this.redraw(node)
-    }
-
-    css() {
-	return `.${this.klass} {
-}
-.${this.klass}__topitem {
-  margin: 0 5px;
-  padding: 5px;
-}
-.${this.klass}__topitem--selected {
-  background-color: #cce8ff;
-}
-.${this.klass} hr {
-  border: 1px solid #f0f0f0;
-  margin: 4px 0 0;
-}`
     }
 }
