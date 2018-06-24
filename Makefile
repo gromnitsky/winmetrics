@@ -11,9 +11,10 @@ LDFLAGS := -mwindows -mconsole
 CFLAGS := -Wall
 
 mkdir = @mkdir -p $(dir $@)
+copy = cp $< $@
 
 all: $(addprefix $(cgi-bin)/, choosefont dpi cygwin1.dll) \
-	$(addprefix $(app)/, $(wildcard index.* web.js))
+	$(addprefix $(app)/, $(wildcard index.* web.*))
 
 define link =
 $(mkdir)
@@ -32,7 +33,7 @@ $(cgi-bin)/cygwin1.dll:
 
 $(app)/%: %
 	$(mkdir)
-	cp $< $@
+	$(copy)
 
 
 
@@ -41,3 +42,12 @@ server: kill all
 
 kill:
 	-pkill -f 'node.exe. server.js'
+
+
+
+$(app)/vendor/node_modules/%: node_modules/%
+	$(mkdir)
+	$(copy)
+
+all: $(addprefix $(app)/vendor/node_modules/, \
+	plain-dialogs/index.mjs)

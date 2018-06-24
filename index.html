@@ -3,25 +3,50 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style type="text/css">
+<style>
   body {
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: 700px;
+    margin: 5px auto;
   }
-  
   img { max-width: 100%; }
+  main {
+    display: flex;
+    margin: 1em 0;
+    height: 400px;
+  }
+  #preview {
+    outline: 1px solid black;
+    height: 100%;
+    flex-grow: 1;
+  }
+  #controls {
+    margin-left: 1em;
+    outline: 1px solid black;
+    width: 250px;
+  }
 </style>
 
-<a href="#" id="exit">Exit</a>
+<nav>
+  <button id="exit">Exit</button>
+  <button id="save">Save</button>
+  <button id="reset">Reset</button>
+  <button id="export">Export</button>
+</nav>
 
-<script>
-  document.querySelector('#exit').onclick = function() {
-      fetch('/cgi-bin/exit').then( r => r.text()).then( () => {
-	  document.querySelector('body').innerHTML = `
-<h1>Server has exited. Please close this tab.</h1>
-`
-      })
-      return false
-  }
-</script>
-<script src="web.js"></script>
+<main>
+  <div id="preview">
+  </div>
+
+  <div id="controls">
+  </div>
+</main>
+
+<footer>
+  <div id="statusbar">
+    Status bar
+  </div>
+
+  Report bugs at <a href="#">http://example.com</a>.
+</footer>
+
+<script type="module" src="web.mjs"></script>

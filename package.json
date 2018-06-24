@@ -6,6 +6,7 @@
     "author": "Alexander Gromnitsky",
     "license": "MIT",
     "dependencies": {
-        "mime": "~2.3.1"
+        "mime": "~2.3.1",
+        "plain-dialogs": "~0.1.0"
     }
 }
