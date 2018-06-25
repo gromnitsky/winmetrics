@@ -33,9 +33,8 @@ function fetcherr(res) {
     return res;
 }
 
-function $(query) {
-    return document.querySelector(query)
-}
+function $(query) { return document.querySelector(query) }
+Element.prototype.$ = function(query) { return this.querySelector(query) }
 
 class Registry {
     download() {
@@ -49,7 +48,7 @@ class Registry {
     }
     async get_menu(name, def) {
 	let r = await this.get(name, def)
-	return this._download = fetch(`/cgi-bin/logfont?v=${r}`)
+	return fetch(`/cgi-bin/logfont?v=${r}`)
 	    .then(fetcherr).then( r => r.text())
     }
 }
@@ -147,17 +146,23 @@ class Menu extends Widget {
     constructor(parent, x,y, css, controls, registry) {
 	super(parent, x,y, css, controls, registry)
 	this.klass = 'w-menu'
-	this.conf = {		// holds promises
-	    height: this.registry.get('MenuHeight', 19 * -15),
-	    choosefont: this.registry.get_menu('MenuFont', 'F4FFFFFF0000000000000000000000009001000000000001030201225300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000')
+	this.conf = {
+	    height: {
+		val: this.registry.get('MenuHeight', 19 * -15),
+		type: 'REG_SZ'
+	    },
+	    choosefont: {
+		val: this.registry.get_menu('MenuFont', 'F4FFFFFF0000000000000000000000009001000000000001030201225300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+		type: 'REG_BINARY'
+	    }
 	}
     }
 
     async height(val) {
-	return val ? this.conf.height = val * -15 : (await this.conf.height) / -15
+	return val ? this.conf.height.val = val * -15 : (await this.conf.height.val) / -15
     }
     async font(val) {
-	return val ? this.conf.choosefont = val : new Logfont(await this.conf.choosefont)
+	return val ? this.conf.choosefont.val = val : new Logfont(await this.conf.choosefont.val)
     }
 
     async css_update() {
@@ -182,16 +187,17 @@ class Menu extends Widget {
     }
 
     controls_activate() {
-	$('#controls button').onclick = async () => {
+	this.controls.$('button').onclick = async () => {
 	    let lf = (await this.font()).lf()
 	    let r = await fetch(`/cgi-bin/choosefont?v=${lf}`)
 		.then(fetcherr).then( r => r.text())
 	    this.font(r)
-	    this.controls_draw()
+	    this.controls.$('button').innerText = (await this.font()).button()
+	    this.draw()
 	}
-	$('#controls input').onchange = el => {
+	this.controls.$('input').onchange = el => {
 	    this.height(el.target.value)
-	    this.controls_draw()
+	    this.draw()
 	}
     }
 
@@ -201,6 +207,5 @@ class Menu extends Widget {
 <p>Row height: <input type="number" min="0" max="50" value="${await this.height()}" step="1"> px</p>
 `
 	this.controls_activate()
-	this.draw()
     }
 }
