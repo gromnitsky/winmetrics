@@ -68,16 +68,18 @@ class CSS {
   height: 300px;
 }
 
+.w-menu__row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 5px;
+}
 .w-menu__topitem {
   margin: 0 5px;
   padding: 5px;
 }
 .w-menu__topitem--selected {
   background-color: #cce8ff;
-}
-.w-menu hr {
-  border: 1px solid #f0f0f0;
-  margin: 4px 0 0;
 }
 `
 	document.body.appendChild(node)
@@ -186,16 +188,18 @@ class Menu extends Widget {
 	r.style.fontWeight = font.weight
 	r.style.fontStyle = Number(font.italic) ? 'italic' : 'normal'
 	r.style.fontSize = `${font.size}pt`
+
+	r = this.css.rule(`.${this.klass}__row`)
+	r.style.height = `${await this.height()}px`
     }
 
     draw() {
 	super.draw()
 	let node = this.node()
 	let k = `${this.klass}__topitem`
-	node.innerHTML = `<span class='${k}'>File</span><span class='${k}'>Edit</span><span class='${k}'>Format</span><span class='${k}'>View</span><span class='${k} ${k}--selected'>Help</span>
-
-<hr>
-
+	node.innerHTML = `<div class="${this.klass}__row">
+<span class='${k}'>File</span><span class='${k}'>Edit</span><span class='${k}'>Format</span><span class='${k}'>View</span><span class='${k} ${k}--selected'>Help</span>
+</div>
 `
 	this.css_update()
     }
