@@ -101,8 +101,18 @@ let server = http.createServer(async function (req, res) {
 	})
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/choosefont') {
-	res.setHeader('Content-Type', 'text/plain')
-	res.end(await run_safely('cgi-bin/choosefont', [], "FIXME"))
+	if (u.query.v) {
+	    res.setHeader('Content-Type', 'text/plain')
+	    res.end(await run_safely('cgi-bin/choosefont', [], u.query.v))
+	} else
+	    err(400)
+
+    } else if (req.method === "GET" && u.pathname === '/cgi-bin/logfont') {
+	if (u.query.v) {
+	    res.setHeader('Content-Type', 'text/plain')
+	    res.end(await run_safely('cgi-bin/choosefont', [u.query.v]))
+	} else
+	    err(400)
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/dpi') {
 	res.setHeader('Content-Type', 'text/plain')

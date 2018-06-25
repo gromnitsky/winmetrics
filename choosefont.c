@@ -119,9 +119,20 @@ font_size(LOGFONTW *lf) {
   return -(lf->lfHeight * 72.0) / logpixelsy;
 }
 
+void
+print_logfont(LOGFONTW *lf) {
+  printf("%s,%ls,%ld,%d,%f\n", logfont2hex(lf),
+	 lf->lfFaceName, lf->lfWeight, lf->lfItalic, font_size(lf));
+}
+
 
 
 int main(int argc, char **argv) {
+  if (argc > 1) {
+    print_logfont((LOGFONTW*)hex2bin(argv[1]));
+    return 0;
+  }
+
   char *logfontw, *line = readline();
   if (1 != sscanf(line, "%m[A-F0-9]", &logfontw))
     errx(1, "expected format: [A-F0-9]+");
@@ -130,8 +141,7 @@ int main(int argc, char **argv) {
   LOGFONTW *lf = (LOGFONTW*)hex2bin(logfontw);
   if (!dlg_font(lf)) exit(1);
 
-  printf("%s,%ls,%d,%d,%f\n", logfont2hex(lf),
-	 lf->lfFaceName, lf->lfWeight, lf->lfItalic, font_size(lf));
+  print_logfont(lf);
   dlog("%s", logfont2str(lf));
 
   return 0;
