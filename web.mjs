@@ -5,7 +5,6 @@ let global_state = {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-
     $('#exit').onclick = async () => {
 	if (global_state.modified) {
 	    if (!await plainDialogs.confirm2("You didn't press 'Save'. Still exit?")) return
@@ -15,12 +14,19 @@ document.addEventListener("DOMContentLoaded", function() {
 	})
 	return false
     }
+    let widgets = []
+    $('#save').onclick = async (el) => {
+	el.target.disabled = true
+	await Promise.all(widgets.map( v => v.save()))
+	el.target.disabled = false
+    }
 
     let registry = new Registry()
     let css = new CSS()
 
     let frame = new Frame($('#preview'), 0,0)
     let menu = new Menu(frame, 0, 20,  css, $('#controls'), registry)
+    widgets.push(menu)
 
     frame.draw()
     menu.draw()
@@ -45,11 +51,6 @@ class Registry {
     async get(name, def) {
 	let r = await this.download()
 	return r[name] ? r[name].val : def
-    }
-    async get_menu(name, def) {
-	let r = await this.get(name, def)
-	return fetch(`/cgi-bin/logfont?v=${r}`)
-	    .then(fetcherr).then( r => r.text())
     }
 }
 
@@ -147,22 +148,35 @@ class Menu extends Widget {
 	super(parent, x,y, css, controls, registry)
 	this.klass = 'w-menu'
 	this.conf = {
-	    height: {
+	    MenuHeight: {
 		val: this.registry.get('MenuHeight', 19 * -15),
 		type: 'REG_SZ'
 	    },
-	    choosefont: {
-		val: this.registry.get_menu('MenuFont', 'F4FFFFFF0000000000000000000000009001000000000001030201225300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+	    MenuFont: {
+		val: this.registry.get('MenuFont', 'F4FFFFFF0000000000000000000000009001000000000001030201225300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
 		type: 'REG_BINARY'
 	    }
 	}
     }
 
-    async height(val) {
-	return val ? this.conf.height.val = val * -15 : (await this.conf.height.val) / -15
+    async save() {
+	let conf = Object.assign({}, this.conf)
+	for (let key in conf) {
+	    conf[key].val = await conf[key].val
+	    // TODO
+	    console.log('saving', key)
+	}
     }
-    async font(val) {
-	return val ? this.conf.choosefont.val = val : new Logfont(await this.conf.choosefont.val)
+
+    async height(val) {
+	return val ? this.conf.MenuHeight.val = val * -15 : (await this.conf.MenuHeight.val) / -15
+    }
+    async font(cf) {
+	if (cf) {
+	    return this.conf.MenuFont.val = new Logfont(cf).lf()
+	} else {
+	    return new Logfont(await fetch(`/cgi-bin/logfont?v=${await this.conf.MenuFont.val}`).then(fetcherr).then( r => r.text()))
+	}
     }
 
     async css_update() {
