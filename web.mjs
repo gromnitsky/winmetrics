@@ -139,10 +139,13 @@ class Logfont {
 	    name: this.cf[1],
 	    weight: this.cf[2],
 	    italic: this.cf[3],
-	    size: this.cf[4]
+	    size_points: this.cf[4],
+	    size_pixels: this.cf[5]
 	}
     }
-    button() { return `${this.cf[1]} ${this.cf[4]}` }
+    button() {
+	return `${this.cf[1]}, ${parseFloat(this.cf[4])}pt, ${this.cf[5]}px`
+    }
 }
 
 class Menu extends Widget {
@@ -187,7 +190,7 @@ class Menu extends Widget {
 	r.style.fontFamily = font.name
 	r.style.fontWeight = font.weight
 	r.style.fontStyle = Number(font.italic) ? 'italic' : 'normal'
-	r.style.fontSize = `${font.size}pt`
+	r.style.fontSize = `${font.size_pixels}px`
 
 	r = this.css.rule(`.${this.klass}__row`)
 	r.style.height = `${await this.height()}px`

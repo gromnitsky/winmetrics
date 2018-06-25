@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <err.h>
+#include <math.h>
 
 #include <windows.h>
 
@@ -110,19 +111,29 @@ readline() {
   return line;
 }
 
-double
-font_size(LOGFONTW *lf) {
+DWORD
+logpixelsy() {
   HDC hdc = GetDC(GetDesktopWindow());
   DWORD logpixelsy = GetDeviceCaps(hdc, LOGPIXELSY);
   ReleaseDC(GetDesktopWindow(), hdc);
+  return logpixelsy;
+}
 
-  return -(lf->lfHeight * 72.0) / logpixelsy;
+double
+font_size_points(LOGFONTW *lf) {
+  return fabs((lf->lfHeight * 72.0) / logpixelsy());
+}
+
+int
+font_size_pixels(LOGFONTW *lf) {
+  return (int)(round(font_size_points(lf) * logpixelsy()) / 72.0);
 }
 
 void
 print_logfont(LOGFONTW *lf) {
-  printf("%s,%ls,%ld,%d,%f\n", logfont2hex(lf),
-	 lf->lfFaceName, lf->lfWeight, lf->lfItalic, font_size(lf));
+  printf("%s,%ls,%ld,%d,%f,%d\n", logfont2hex(lf),
+	 lf->lfFaceName, lf->lfWeight, lf->lfItalic,
+	 font_size_points(lf), font_size_pixels(lf));
 }
 
 
