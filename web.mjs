@@ -1,12 +1,11 @@
 import * as plainDialogs from './vendor/node_modules/plain-dialogs/index.mjs'
 
-let global_state = {
-    modified: false
-}
-
 document.addEventListener("DOMContentLoaded", function() {
+    let widgets = []
+    let is_modified = () => widgets.some( v => v.is_modified)
+
     $('#exit').onclick = async () => {
-	if (global_state.modified) {
+	if (is_modified()) {
 	    if (!await plainDialogs.confirm2("You didn't press 'Save'. Still exit?")) return
 	}
 	fetch('/cgi-bin/exit').then(fetcherr).then( r => r.text()).then( () => {
@@ -14,7 +13,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	})
 	return false
     }
-    let widgets = []
     $('#save').onclick = async (el) => {
 	el.target.disabled = true
 	await Promise.all(widgets.map( v => v.save()))
@@ -103,6 +101,8 @@ class Widget {
 	this.controls = controls
 	this.registry = registry
 
+	this.conf = {}
+	this.is_modified = false
 	this.id = 'widget-' + Math.random().toString(36).substring(2,7)
 	this._node = document.createElement('div')
 	this._node.id = this.id
@@ -121,6 +121,15 @@ class Widget {
 	}
 	this.node().style.left = `${this.x}px`
 	this.node().style.top = `${this.y}px`
+    }
+    async save() {
+	let conf = Object.assign({}, this.conf)
+	for (let key in conf) {
+	    conf[key].val = await conf[key].val
+	    // TODO
+	    console.log('saving', key)
+	}
+	this.is_modified = false
     }
 }
 
@@ -161,15 +170,6 @@ class Menu extends Widget {
 		val: this.registry.get('MenuFont', 'F4FFFFFF0000000000000000000000009001000000000001030201225300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
 		type: 'REG_BINARY'
 	    }
-	}
-    }
-
-    async save() {
-	let conf = Object.assign({}, this.conf)
-	for (let key in conf) {
-	    conf[key].val = await conf[key].val
-	    // TODO
-	    console.log('saving', key)
 	}
     }
 
@@ -215,10 +215,12 @@ class Menu extends Widget {
 	    this.font(r)
 	    this.controls.$('button').innerText = (await this.font()).button()
 	    this.draw()
+	    this.is_modified = true
 	}
 	this.controls.$('input').onchange = el => {
 	    this.height(el.target.value)
 	    this.draw()
+	    this.is_modified = true
 	}
     }
 
