@@ -25,7 +25,17 @@ document.addEventListener("DOMContentLoaded", function() {
     let menu = new Menu($('#notepad-menu'), 'css-global', $('#controls'),
 			registry)
     widgets.push(menu)
-    menu.controls_draw()
+    let title = new Title($('#notepad-title'), 'css-global', $('#controls'),
+			  registry)
+    widgets.push(title)
+
+    widgets.forEach( w => {
+	w.css_update()
+	w.node.onclick = function() {
+	    w.controls_draw()
+	}
+    })
+    title.controls_draw()
 })
 
 function dpi() { // https://stackoverflow.com/a/35941703
@@ -117,6 +127,7 @@ class Menu extends Widget {
     constructor(node_qs, style_qs, controls_qs, registry) {
 	super(node_qs, style_qs, controls_qs, registry)
 	this.klass = 'w-menu'
+	this.controls_title = "Menu"
 	this.conf = {
 	    MenuHeight: {
 		val: this.registry.get('MenuHeight', 19 * -15),
@@ -130,18 +141,22 @@ class Menu extends Widget {
     }
 
     async height(val) {
-	return val ? this.conf.MenuHeight.val = val * -15 : (await this.conf.MenuHeight.val) / -15
+	let key = Object.keys(this.conf).filter( k => /Height$/.test(k))
+	let opt = this.conf[key]
+	return val ? opt.val = val * -15 : (await opt.val) / -15
     }
     async font(cf) {
+	let key = Object.keys(this.conf).filter( k => /Font$/.test(k))
+	let opt = this.conf[key]
 	if (cf) {
-	    return this.conf.MenuFont.val = new Logfont(cf).lf()
+	    return opt.val = new Logfont(cf).lf()
 	} else {
-	    return new Logfont(await fetch(`/cgi-bin/logfont?v=${await this.conf.MenuFont.val}`).then(fetcherr).then( r => r.text()))
+	    return new Logfont(await fetch(`/cgi-bin/logfont?v=${await opt.val}`).then(fetcherr).then( r => r.text()))
 	}
     }
 
     async css_update() {
-	let r = this.css.rule(`.${this.klass}__topitem`)
+	let r = this.css.rule(`.${this.klass}__text`)
 	let font = (await this.font()).css()
 	r.style.fontFamily = font.name
 	r.style.fontWeight = font.weight
@@ -161,7 +176,7 @@ class Menu extends Widget {
 	    this.controls.$('button').innerText = (await this.font()).button()
 	    await this.css_update()
 
-	    let menu_item_height = this.node.$('span').clientHeight
+	    let menu_item_height = this.node.$(`.${this.klass}__text`).clientHeight
 	    if (menu_item_height > await this.height()) {
 		this.controls.$('input').value = menu_item_height
 		event_trigger(this.controls.$('input'), 'change')
@@ -177,7 +192,7 @@ class Menu extends Widget {
     }
 
     async controls_draw() {
-	this.controls.innerHTML = `<h3>Menu</h3>
+	this.controls.innerHTML = `<h3>${this.controls_title}</h3>
 <p>Font: <button>${(await this.font()).button()}</button></p>
 <p>Row height: <input type="number" min="0" max="2000" value="${await this.height()}" step="1" size="4"> px</p>
 `
@@ -189,4 +204,22 @@ class Menu extends Widget {
 function event_trigger(node, event) {
     let e = new Event(event)
     node.dispatchEvent(e)
+}
+
+class Title extends Menu {
+    constructor(node_qs, style_qs, controls_qs, registry) {
+	super(node_qs, style_qs, controls_qs, registry)
+	this.klass = 'w-title'
+	this.controls_title = "Title"
+	this.conf = {
+	    CaptionHeight: {
+		val: this.registry.get('CaptionHeight', 22 * -15),
+		type: 'REG_SZ'
+	    },
+	    CaptionFont: {
+		val: this.registry.get('CaptionFont', 'F1FFFFFF0000000000000000000000009001000000000001000000005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+		type: 'REG_BINARY'
+	    }
+	}
+    }
 }

@@ -13,8 +13,17 @@
 <main>
   <div id="preview">
     <div class="w-frame">
+      <div class="w-title" id="notepad-title">
+	<div class="w-title__text"><b>&#22270;</b> Untitled - Notepad</div>
+	<div>
+	  <span class="w-title__controls">&#9472;</span>
+	  <span class="w-title__controls">&#x20DE;</span>
+	  <span class="w-title__controls">&#x2715;</span>
+	</div>
+      </div>
+
       <div class="w-menu" id="notepad-menu">
-	<span class="w-menu__topitem">File</span><span class="w-menu__topitem">Edit</span><span class="w-menu__topitem">Format</span><span class="w-menu__topitem">View</span><span class="w-menu__topitem w-menu__topitem--selected">Help</span>
+	<span class="w-menu__text">File</span><span class="w-menu__text">Edit</span><span class="w-menu__text">Format</span><span class="w-menu__text">View</span><span class="w-menu__text w-menu__text--selected">Help</span>
       </div>
 
       <div id="notepad-text">
@@ -80,28 +89,48 @@
     height: 300px;
   }
 
+  .w-title {
+    cursor: pointer;
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 5px 0;
+  }
+  .w-title:hover {
+    background: #ffd500;
+  }
+  .w-title__text {}
+  .w-title__controls {
+    padding: 0 15px;
+  }
+
   #notepad-text {
     margin: 5px;
     font-family: monospace
   }
 
   .w-menu {
+    cursor: pointer;
     display: flex;
     align-items: center;
     box-shadow: 0 2px 0 #f0f0f0;
   }
-  .w-menu__topitem {
+  .w-menu:hover {
+    background: #ffd500;
+  }
+  .w-menu__text {
     margin: 0 8px;
   }
-  .w-menu__topitem::first-letter {
+  .w-menu__text::first-letter {
     text-decoration: underline;
   }
-  .w-menu__topitem--selected {
+  .w-menu__text--selected {
     background-color: #cce8ff;
     padding: 0 8px;
     margin: 0;
   }
-  
+
   #controls h3 {
     margin: 0 0 0.5em;
   }
