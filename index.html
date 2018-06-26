@@ -3,32 +3,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-  body {
-    max-width: 800px;
-    margin: 5px auto;
-  }
-  img { max-width: 100%; }
-  main {
-    display: flex;
-    margin: 1em 0;
-    height: 400px;
-  }
-  #preview {
-    /* outline: 1px solid black; */
-    height: 100%;
-    width: 530px;
-    overflow: auto;
-    padding-right: 5px;
-  }
-  #controls {
-    margin-left: 5px;
-    padding: 10px;
-    outline: 1px solid black;
-    flex-grow: 1;
-  }
-</style>
-
 <nav>
   <button id="exit">Exit</button>
   <button id="save">Save</button>
@@ -38,6 +12,18 @@
 
 <main>
   <div id="preview">
+    <div class="w-frame">
+      <div class="w-menu" id="notepad-menu">
+	<span class="w-menu__topitem">File</span><span class="w-menu__topitem">Edit</span><span class="w-menu__topitem">Format</span><span class="w-menu__topitem">View</span><span class="w-menu__topitem w-menu__topitem--selected">Help</span>
+      </div>
+
+      <div id="notepad-text">
+	Lucy Locket lost her pocket,<br>
+	Kitty Fisher found it;<br>
+	Not a penny was there in it,<br>
+	Only ribbon round it.
+      </div>
+    </div>
   </div>
 
   <div id="controls">
@@ -51,5 +37,63 @@
 
   Report bugs at <a href="#">http://example.com</a>.
 </footer>
+
+<style id="css-global">
+  body {
+    max-width: 800px;
+    margin: 5px auto;
+  }
+  img { max-width: 100%; }
+
+  main {
+    display: flex;
+    margin: 1em 0;
+    height: 400px;
+  }
+  #preview {
+    height: 100%;
+    width: 530px;
+    overflow: auto;
+    padding-right: 5px;
+  }
+  #controls {
+    margin-left: 10px;
+    outline: 1px solid black;
+    flex-grow: 1;
+  }
+
+  .w-frame {
+    border: 1px solid #4891b8;
+    width: 100%;
+    height: 300px;
+  }
+
+  #notepad-text {
+    margin: 3px;
+    font-family: monospace
+  }
+
+  .w-menu {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #f0f0f0;
+    padding: 5px 0;
+  }
+  .w-menu__topitem {
+    margin-left: 4px;
+    padding: 5px;
+  }
+  .w-menu__topitem:first-child {
+    margin-left: 1px;
+    padding: 5px;
+  }
+  .w-menu__topitem--selected {
+    background-color: #cce8ff;
+  }
+  
+  #controls h3 {
+    margin: 0 0 0.5em;
+  }
+</style>
 
 <script type="module" src="web.mjs"></script>
