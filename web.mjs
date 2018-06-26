@@ -22,10 +22,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     let registry = new Registry()
-    let menu = new Menu($('#notepad-menu'), 'css-global', $('#controls'),
+    let menu = new Menu($('#notepad__menu'), 'css-global', $('#controls'),
 			registry)
     widgets.push(menu)
-    let title = new Title($('#notepad-title'), 'css-global', $('#controls'),
+    let title = new Title($('#notepad__title'), 'css-global', $('#controls'),
 			  registry)
     widgets.push(title)
 

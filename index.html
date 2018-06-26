@@ -13,7 +13,7 @@
 <main>
   <div id="preview">
     <div class="w-frame">
-      <div class="w-title" id="notepad-title">
+      <div class="w-title" id="notepad__title">
 	<div class="w-title__text"><b>&#22270;</b> Untitled - Notepad</div>
 	<div>
 	  <span class="w-title__controls">&#9472;</span>
@@ -22,15 +22,46 @@
 	</div>
       </div>
 
-      <div class="w-menu" id="notepad-menu">
+      <div class="w-menu" id="notepad__menu">
 	<span class="w-menu__text">File</span><span class="w-menu__text">Edit</span><span class="w-menu__text">Format</span><span class="w-menu__text">View</span><span class="w-menu__text w-menu__text--selected">Help</span>
       </div>
 
-      <div id="notepad-text">
-	Lucy Locket lost her pocket,<br>
-	Kitty Fisher found it;<br>
-	Not a penny was there in it,<br>
-	Only ribbon round it.
+      <div id="notepad__box">
+
+	<div>
+	  <div id="notepad__nursery_rhyme">
+	    Doctor Foster went to Gloucester,<br>
+	    In a shower of rain;<br>
+	    He stepped in a puddle,<br>
+	    Right up to his middle,<br>
+	    And never went there again.
+	  </div>
+
+	  <div class="w-frame" id="msg">
+	    <div class="w-title">
+	      <div class="w-title__text">A true story</div>
+	      <div>
+		<span class="w-title__controls">&#x2715;</span>
+	      </div>
+	    </div>
+	    <div class="w-messagetext" id="msg__text">
+	      Lucy Locket lost her pocket,<br>
+	      Kitty Fisher found it;<br>
+	      Not a penny was there in it,<br>
+	      Only ribbon round it.
+	    </div>
+	    <div id="msg__btn">
+	      <button disabled class="w-messagetext">OK</button>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="w-scrollbar-y">
+	</div>
+
+      </div>
+
+      <div class="w-statusbar">
       </div>
     </div>
   </div>
@@ -66,7 +97,6 @@
   main {
     display: flex;
     margin: 1em 0;
-    height: 400px;
   }
   #preview {
     height: 100%;
@@ -76,17 +106,11 @@
   }
   #controls {
     margin-left: 10px;
-    outline: 1px solid black;
     flex-grow: 1;
-  }
-  footer {
-    margin-top: 1em;
   }
 
   .w-frame {
     border: 1px solid #4891b8;
-    width: 100%;
-    height: 300px;
   }
 
   .w-title {
@@ -105,7 +129,7 @@
     padding: 0 15px;
   }
 
-  #notepad-text {
+  #notepad__nursery_rhyme {
     margin: 5px;
     font-family: monospace
   }
@@ -129,6 +153,41 @@
     background-color: #cce8ff;
     padding: 0 8px;
     margin: 0;
+  }
+
+  #notepad__box {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  #msg {
+    margin: 1em;
+  }
+  #msg__btn {
+    background-color:  #f0f0f0;
+    height: 3.5em;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 1.5em;
+  }
+  #msg__btn button {
+    width: 7em;
+    height: 2.3em;
+  }
+  #msg__text {
+    margin: 2em 1em;
+  }
+
+  .w-scrollbar-y {
+    width: 15px;
+    background-color: #f0f0f0;
+  }
+
+  .w-statusbar {
+    height: 20px;
+    background-color: #f0f0f0;
+    border-top: 2px solid #d7d7d7;
   }
 
   #controls h3 {
