@@ -142,7 +142,14 @@ class Menu extends Widget {
 		.then(fetcherr).then( r => r.text())
 	    this.font(r)
 	    this.controls.$('button').innerText = (await this.font()).button()
-	    this.css_update()
+	    await this.css_update()
+
+	    let menu_item_height = this.node.$('span').clientHeight
+	    if (menu_item_height > await this.height()) {
+		this.controls.$('input').value = menu_item_height
+		event_trigger(this.controls.$('input'), 'change')
+	    }
+
 	    this.is_modified = true
 	}
 	this.controls.$('input').onchange = el => {
@@ -160,4 +167,9 @@ class Menu extends Widget {
 	this.css_update()
 	this.controls_activate()
     }
+}
+
+function event_trigger(node, event) {
+    let e = new Event(event)
+    node.dispatchEvent(e)
 }

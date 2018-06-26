@@ -69,26 +69,25 @@
   }
 
   #notepad-text {
-    margin: 3px;
+    margin: 5px;
     font-family: monospace
   }
 
   .w-menu {
     display: flex;
     align-items: center;
-    border-bottom: 2px solid #f0f0f0;
-    padding: 5px 0;
+    box-shadow: 0 2px 0 #f0f0f0;
   }
   .w-menu__topitem {
-    margin-left: 4px;
-    padding: 5px;
+    margin: 0 8px;
   }
-  .w-menu__topitem:first-child {
-    margin-left: 1px;
-    padding: 5px;
+  .w-menu__topitem::first-letter {
+    text-decoration: underline;
   }
   .w-menu__topitem--selected {
     background-color: #cce8ff;
+    padding: 0 8px;
+    margin: 0;
   }
   
   #controls h3 {
