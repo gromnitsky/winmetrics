@@ -31,11 +31,20 @@
 </main>
 
 <footer>
-  <div id="statusbar">
-    Status bar
+  <div id="dpi">
+    <table>
+      <tr>
+	<td>DPI according to Windows:</td><td id="dpi-windows">?</td>
+      </tr>
+      <tr>
+	<td>DPI according to this browser:</td><td id="dpi-browser">?</td>
+      </tr>
+    </table>
   </div>
 
-  Report bugs at <a href="#">http://example.com</a>.
+  <div style="text-align: right">
+    Report bugs at <a href="#">http://example.com</a>.
+  </div>
 </footer>
 
 <style id="css-global">
@@ -60,6 +69,9 @@
     margin-left: 10px;
     outline: 1px solid black;
     flex-grow: 1;
+  }
+  footer {
+    margin-top: 1em;
   }
 
   .w-frame {

@@ -1,6 +1,8 @@
 import * as plainDialogs from './vendor/node_modules/plain-dialogs/index.mjs'
 
 document.addEventListener("DOMContentLoaded", function() {
+    draw_dpi()
+
     let widgets = []
     let is_modified = () => widgets.some( v => v.is_modified)
 
@@ -25,6 +27,21 @@ document.addEventListener("DOMContentLoaded", function() {
     widgets.push(menu)
     menu.controls_draw()
 })
+
+function dpi() { // https://stackoverflow.com/a/35941703
+    function findFirstPositive(b, a, i, c) {
+	c=(d,e)=>e>=d?(a=d+(e-d)/2,0<b(a)&&(a==d||0>=b(a-1))?a:0>=b(a)?c(a+1,e):c(d,a-1)):-1
+	for (i = 1; 0 >= b(i);) i *= 2
+	return c(i / 2, i)|0
+    }
+    return findFirstPositive(x => matchMedia(`(max-resolution: ${x}dpi)`).matches)
+}
+
+function draw_dpi() {
+    $('#dpi-browser').innerText = dpi()
+    fetch('/cgi-bin/dpi').then(fetcherr)
+	.then( r => r.text()).then( r => $('#dpi-windows').innerText = r)
+}
 
 function fetcherr(res) {
     if (!res.ok) throw new Error(res.statusText)
