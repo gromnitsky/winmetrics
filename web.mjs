@@ -22,18 +22,20 @@ document.addEventListener("DOMContentLoaded", function() {
     let registry = new Registry()
     let css = new CSS()
 
-    let frame = new Frame($('#preview'), 0,0)
-    let menu = new Menu(frame, 0, 20,  css, $('#controls'), registry)
+    let frame = new Frame($('#preview'), null,-1)
+    let menu = new Menu(frame, null, -1,  css, $('#controls'), registry)
     widgets.push(menu)
+    let lucylocket = new LucyLocket(frame, null, -1)
 
     frame.draw()
     menu.draw()
+    lucylocket.draw()
 
     menu.controls_draw()
 })
 
 function fetcherr(res) {
-    if (!res.ok) throw Error(res.statusText)
+    if (!res.ok) throw new Error(res.statusText)
     return res;
 }
 
@@ -65,15 +67,23 @@ class CSS {
   width: 100%;
   height: 300px;
 }
+.w-lucylocket {
+  margin: 3px;
+  font-family: monospace
+}
 
-.w-menu__row {
+.w-menu {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 5px;
+  border-bottom: 2px solid #f0f0f0;
+  padding: 5px 0;
 }
 .w-menu__topitem {
-  margin: 0 5px;
+  margin-left: 4px;
+  padding: 5px;
+}
+.w-menu__topitem:first-child {
+  margin-left: 1px;
   padding: 5px;
 }
 .w-menu__topitem--selected {
@@ -106,7 +116,7 @@ class Widget {
 	this.id = 'widget-' + Math.random().toString(36).substring(2,7)
 	this._node = document.createElement('div')
 	this._node.id = this.id
-	this._node.style.position = 'relative'
+	if (x !== null) this._node.style.position = 'relative'
     }
 
     moveto(x,y) { [this.x, this.y] = [x,y] }
@@ -119,8 +129,10 @@ class Widget {
 	    let parent = this.parent instanceof Widget ? this.parent.node() : this.parent
 	    parent.appendChild(this._node)
 	}
-	this.node().style.left = `${this.x}px`
-	this.node().style.top = `${this.y}px`
+	if (this.x !== null) {
+	    this.node().style.left = `${this.x}px`
+	    this.node().style.top = `${this.y}px`
+	}
     }
     async save() {
 	let conf = Object.assign({}, this.conf)
@@ -137,6 +149,22 @@ class Frame extends Widget {
     constructor(parent, x,y) {
 	super(parent, x,y)
 	this.klass = 'w-frame'
+    }
+}
+
+class LucyLocket extends Widget {
+    constructor(parent, x,y) {
+	super(parent, x,y)
+	this.klass = 'w-lucylocket'
+    }
+    draw() {
+	super.draw()
+	this.node().innerHTML = `
+Lucy Locket lost her pocket,<br>
+Kitty Fisher found it;<br>
+Not a penny was there in it,<br>
+Only ribbon round it.
+`
     }
 }
 
@@ -192,7 +220,7 @@ class Menu extends Widget {
 	r.style.fontStyle = Number(font.italic) ? 'italic' : 'normal'
 	r.style.fontSize = `${font.size_pixels}px`
 
-	r = this.css.rule(`.${this.klass}__row`)
+	r = this.css.rule(`.${this.klass}`)
 	r.style.height = `${await this.height()}px`
     }
 
@@ -200,9 +228,8 @@ class Menu extends Widget {
 	super.draw()
 	let node = this.node()
 	let k = `${this.klass}__topitem`
-	node.innerHTML = `<div class="${this.klass}__row">
+	node.innerHTML = `
 <span class='${k}'>File</span><span class='${k}'>Edit</span><span class='${k}'>Format</span><span class='${k}'>View</span><span class='${k} ${k}--selected'>Help</span>
-</div>
 `
 	this.css_update()
     }
@@ -227,7 +254,7 @@ class Menu extends Widget {
     async controls_draw() {
 	this.controls.innerHTML = `<h3>Menu</h3>
 <p>Font: <button>${(await this.font()).button()}</button></p>
-<p>Row height: <input type="number" min="0" max="50" value="${await this.height()}" step="1"> px</p>
+<p>Row height: <input type="number" min="0" max="2000" value="${await this.height()}" step="1"> px</p>
 `
 	this.controls_activate()
     }
