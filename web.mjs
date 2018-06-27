@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	    w.controls_draw()
 	}
     })
+    $('#message .w-title').onclick = function() { title.controls_draw() }
+
     title.controls_draw()
 })
 
@@ -168,7 +170,7 @@ class Menu extends Widget {
     }
 
     async css_update() {
-	this.css_update_font()
+	await this.css_update_font()
 
 	let r = this.css.rule(`.${this.klass}`)
 	r.style.height = `${await this.height()}px`
@@ -186,7 +188,7 @@ class Menu extends Widget {
 
     controls_activate() {
 	this.controls.$('button').onclick = async (el) => {
-	    this.controls_activate_button(el.target)
+	    await this.controls_activate_button(el.target)
 
 	    let menu_item_height = this.node.$(`.${this.klass}__text`).clientHeight
 	    if (menu_item_height > await this.height()) {
@@ -250,7 +252,7 @@ class Message extends Menu {
 	this.css_update_font()
     }
     controls_activate() {
-	this.controls.$('button').onclick = async (el) => {
+	this.controls.$('button').onclick = (el) => {
 	    this.controls_activate_button(el.target)
 	}
     }
