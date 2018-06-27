@@ -90,25 +90,30 @@
 </footer>
 
 <style id="css-global">
+  :root {
+    --body-width: 800px;
+    --preview-width: 530px;
+    --widget-hover-color: #ffd500;
+  }
+
   body {
-    max-width: 800px;
+    max-width: var(--body-width);
     margin: 5px auto;
   }
-  img { max-width: 100%; }
 
   main {
     display: flex;
     margin: 1em 0;
   }
   #preview {
-    height: 100%;
-    width: 530px;
+    width: var(--preview-width);
     overflow: auto;
     padding-right: 5px;
   }
   #controls {
-    margin-left: 10px;
     flex-grow: 1;
+    position: fixed;
+    margin-left: calc(var(--preview-width) + 10px)
   }
 
   .w-frame {
@@ -124,7 +129,7 @@
     margin: 5px 0;
   }
   .w-title:hover {
-    background: #ffd500;
+    background: var(--widget-hover-color);
   }
   .w-title__text {}
   .w-title__controls {
@@ -143,7 +148,7 @@
     box-shadow: 0 2px 0 #f0f0f0;
   }
   .w-menu:hover {
-    background: #ffd500;
+    background: var(--widget-hover-color);
   }
   .w-menu__text {
     margin: 0 8px;
@@ -186,7 +191,7 @@
     cursor: pointer;
   }
   .w-message__text:hover {
-     background: #ffd500;
+     background: var(--widget-hover-color);
   }
 
   .w-scrollbar-y {
