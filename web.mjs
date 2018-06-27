@@ -28,6 +28,9 @@ document.addEventListener("DOMContentLoaded", function() {
     let title = new Title($('#notepad__title'), 'css-global', $('#controls'),
 			  registry)
     widgets.push(title)
+    let msg = new Message($('#message__text'), 'css-global', $('#controls'),
+			  registry)
+    widgets.push(msg)
 
     widgets.forEach( w => {
 	w.css_update()
@@ -155,34 +158,41 @@ class Menu extends Widget {
 	}
     }
 
-    async css_update() {
+    async css_update_font() {
 	let r = this.css.rule(`.${this.klass}__text`)
 	let font = (await this.font()).css()
 	r.style.fontFamily = font.name
 	r.style.fontWeight = font.weight
 	r.style.fontStyle = Number(font.italic) ? 'italic' : 'normal'
 	r.style.fontSize = `${font.size_pixels}px`
+    }
 
-	r = this.css.rule(`.${this.klass}`)
+    async css_update() {
+	this.css_update_font()
+
+	let r = this.css.rule(`.${this.klass}`)
 	r.style.height = `${await this.height()}px`
     }
 
+    async controls_activate_button(node) {
+	let lf = (await this.font()).lf()
+	let r = await fetch(`/cgi-bin/choosefont?v=${lf}`) // ask an user
+	    .then(fetcherr).then( r => r.text())
+	this.font(r)
+	node.innerText = (await this.font()).button()
+	await this.css_update()
+	this.is_modified = true
+    }
+
     controls_activate() {
-	this.controls.$('button').onclick = async () => {
-	    let lf = (await this.font()).lf()
-	    let r = await fetch(`/cgi-bin/choosefont?v=${lf}`)
-		.then(fetcherr).then( r => r.text())
-	    this.font(r)
-	    this.controls.$('button').innerText = (await this.font()).button()
-	    await this.css_update()
+	this.controls.$('button').onclick = async (el) => {
+	    this.controls_activate_button(el.target)
 
 	    let menu_item_height = this.node.$(`.${this.klass}__text`).clientHeight
 	    if (menu_item_height > await this.height()) {
 		this.controls.$('input').value = menu_item_height
 		event_trigger(this.controls.$('input'), 'change')
 	    }
-
-	    this.is_modified = true
 	}
 	this.controls.$('input').onchange = el => {
 	    this.height(el.target.value)
@@ -221,5 +231,34 @@ class Title extends Menu {
 		type: 'REG_BINARY'
 	    }
 	}
+    }
+}
+
+class Message extends Menu {
+    constructor(node_qs, style_qs, controls_qs, registry) {
+	super(node_qs, style_qs, controls_qs, registry)
+	this.klass = 'w-message'
+	this.controls_title = "Message text"
+	this.conf = {
+	    MessageFont: {
+		val: this.registry.get('MessageFont', 'F1FFFFFF0000000000000000000000009001000000000001000000005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+		type: 'REG_BINARY'
+	    }
+	}
+    }
+    async css_update() {
+	this.css_update_font()
+    }
+    controls_activate() {
+	this.controls.$('button').onclick = async (el) => {
+	    this.controls_activate_button(el.target)
+	}
+    }
+    async controls_draw() {
+	this.controls.innerHTML = `<h3>${this.controls_title}</h3>
+<p>Font: <button>${(await this.font()).button()}</button></p>
+`
+	this.css_update()
+	this.controls_activate()
     }
 }

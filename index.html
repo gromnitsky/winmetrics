@@ -37,21 +37,23 @@
 	    And never went there again.
 	  </div>
 
-	  <div class="w-frame" id="msg">
+	  <div class="w-frame" id="message">
 	    <div class="w-title">
 	      <div class="w-title__text">A true story</div>
 	      <div>
 		<span class="w-title__controls">&#x2715;</span>
 	      </div>
 	    </div>
-	    <div class="w-messagetext" id="msg__text">
-	      Lucy Locket lost her pocket,<br>
-	      Kitty Fisher found it;<br>
-	      Not a penny was there in it,<br>
-	      Only ribbon round it.
-	    </div>
-	    <div id="msg__btn">
-	      <button disabled class="w-messagetext">OK</button>
+	    <div class="w-message" id="message__text">
+	      <div class="w-message__text">
+		Lucy Locket lost her pocket,<br>
+		Kitty Fisher found it;<br>
+		Not a penny was there in it,<br>
+		Only ribbon round it.
+	      </div>
+	      <div id="message__btn">
+		<button class="w-message__text">OK</button>
+	      </div>
 	    </div>
 	  </div>
 	</div>
@@ -160,23 +162,31 @@
     justify-content: space-between;
   }
 
-  #msg {
+  #message {
     margin: 1em;
   }
-  #msg__btn {
+  #message__btn {
     background-color:  #f0f0f0;
-    height: 3.5em;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     padding-right: 1.5em;
   }
-  #msg__btn button {
-    width: 7em;
-    height: 2.3em;
+  #message__btn {
+    padding: 1em 2em;
   }
-  #msg__text {
+  #message__btn button {
+    padding: 0.4em 2.4em;
+  }
+  #message__text div:first-child {
     margin: 2em 1em;
+  }
+  .w-message {}
+  .w-message__text {
+    cursor: pointer;
+  }
+  .w-message__text:hover {
+     background: #ffd500;
   }
 
   .w-scrollbar-y {
