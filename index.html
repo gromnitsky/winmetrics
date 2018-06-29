@@ -58,12 +58,18 @@
 	  </div>
 	</div>
 
-	<div class="w-scrollbar-y">
+	<div class="w-scrollbar" id="notepad__scrollbar">
+	  <div style="transform: rotate(180deg)">&#x2335;</div>
+	  <div class="w-scrollbar__thumb"></div>
+	  <div>&#x2335;</div>
 	</div>
 
       </div>
 
-      <div class="w-statusbar">
+      <div class="w-statusbar" id="notepad__statusbar">
+	<div class="w-statusbar__text">
+	  Little Tom Tucker sings for his supper
+	</div>
       </div>
     </div>
   </div>
@@ -194,16 +200,36 @@
      background: var(--widget-hover-color);
   }
 
-  .w-scrollbar-y {
-    width: 15px;
+  .w-scrollbar {
+    width: 17px;
     background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .w-scrollbar > div {
+    padding: 3px 0;
+  }
+  .w-scrollbar:hover {
+     background: var(--widget-hover-color);
+  }
+  .w-scrollbar__thumb {
+    height: 100px;
+    width: 100%;
+    background: #d7d7d7;
   }
 
   .w-statusbar {
-    height: 20px;
+    cursor: pointer;
+    padding: 2px 5px;
     background-color: #f0f0f0;
     border-top: 2px solid #d7d7d7;
   }
+  .w-statusbar:hover {
+     background: var(--widget-hover-color);
+  }
+  .w-statusbar__text {}
 
   #controls h3 {
     margin: 0 0 0.5em;

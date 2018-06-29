@@ -31,6 +31,12 @@ document.addEventListener("DOMContentLoaded", function() {
     let msg = new Message($('#message__text'), 'css-global', $('#controls'),
 			  registry)
     widgets.push(msg)
+    let statusbar = new StatusBar($('#notepad__statusbar'),
+				  'css-global', $('#controls'), registry)
+    widgets.push(statusbar)
+    let scrollbar = new Scrollbar($('#notepad__scrollbar'),
+				  'css-global', $('#controls'), registry)
+    widgets.push(scrollbar)
 
     widgets.forEach( w => {
 	w.css_update()
@@ -259,6 +265,59 @@ class Message extends Menu {
     async controls_draw() {
 	this.controls.innerHTML = `<h3>${this.controls_title}</h3>
 <p>Font: <button>${(await this.font()).button()}</button></p>
+`
+	this.css_update()
+	this.controls_activate()
+    }
+}
+
+class StatusBar extends Message {
+    constructor(node_qs, style_qs, controls_qs, registry) {
+	super(node_qs, style_qs, controls_qs, registry)
+	this.klass = 'w-statusbar'
+	this.controls_title = "Status bar"
+	this.conf = {
+	    StatusFont: {
+		val: this.registry.get('StatusFont', 'F1FFFFFF0000000000000000000000009001000000000001000000005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+		type: 'REG_BINARY'
+	    }
+	}
+    }
+}
+
+class Scrollbar extends Widget {
+    constructor(node_qs, style_qs, controls_qs, registry) {
+	super(node_qs, style_qs, controls_qs, registry)
+	this.klass = 'w-scrollbar'
+	this.controls_title = "Scrollbar"
+	this.conf = {
+	    ScrollWidth: {
+		val: this.registry.get('ScrollWidth', 17 * -15),
+		type: 'REG_SZ'
+	    }
+	}
+    }
+
+    async width(val) {
+	return val ? this.conf.ScrollWidth.val = val * -15 : (await this.conf.ScrollWidth.val) / -15
+    }
+
+    async css_update() {
+	let r = this.css.rule(`.${this.klass}`)
+	r.style.width = `${await this.width()}px`
+    }
+
+    controls_activate() {
+	this.controls.$('input').onchange = el => {
+	    this.width(el.target.value)
+	    this.css_update()
+	    this.is_modified = true
+	}
+    }
+
+    async controls_draw() {
+	this.controls.innerHTML = `<h3>${this.controls_title}</h3>
+<p>Width: <input type="number" min="1" max="200" value="${await this.width()}" step="1" size="4"> px</p>
 `
 	this.css_update()
 	this.controls_activate()
