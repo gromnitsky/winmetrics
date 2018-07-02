@@ -1,8 +1,15 @@
 document.addEventListener("DOMContentLoaded", function() {
     draw_dpi()
 
-    let widgets = []
-    let is_modified = () => widgets.some( v => v.is_modified)
+    let widgets = {
+	list: [],
+	cur: null,
+	select(w) {
+	    w.controls_draw()
+	    this.cur = w
+	}
+    }
+    let is_modified = () => widgets.list.some( v => v.is_modified)
 
     $('#exit').onclick = async () => {
 	if (is_modified() && !confirm("You didn't press 'Save'. Still exit?"))
@@ -15,38 +22,49 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     $('#save').onclick = async (el) => {
 	el.target.disabled = true
-	await Promise.all(widgets.map( v => v.save()))
+	await Promise.all(widgets.list.map( v => v.save()))
 	el.target.disabled = false
+    }
+    $('#reset').onclick = async () => {
+	if (!confirm("Reset to defaults?")) return
+	await Promise.all(widgets.list.map( async v => {
+	    v.conf_clone('conf_def', 'conf')
+	    v.is_modified = true
+	    return v.css_update()
+	}))
+	widgets.cur.controls_draw()
     }
 
     let registry = new Registry()
     let menu = new Menu($('#notepad__menu'), 'css-global', $('#controls'),
 			registry)
-    widgets.push(menu)
+    widgets.list.push(menu)
     let title = new Title($('#notepad__title'), 'css-global', $('#controls'),
 			  registry)
-    widgets.push(title)
+    widgets.list.push(title)
     let msg = new Message($('#message__text'), 'css-global', $('#controls'),
 			  registry)
-    widgets.push(msg)
+    widgets.list.push(msg)
     let statusbar = new StatusBar($('#notepad__statusbar'),
 				  'css-global', $('#controls'), registry)
-    widgets.push(statusbar)
+    widgets.list.push(statusbar)
     let scrollbar = new Scrollbar($('#notepad__scrollbar'),
 				  'css-global', $('#controls'), registry)
-    widgets.push(scrollbar)
+    widgets.list.push(scrollbar)
     let icons = new Icons($('#icons'), 'css-global', $('#controls'), registry)
-    widgets.push(icons)
+    widgets.list.push(icons)
 
-    widgets.forEach( w => {
+    widgets.list.forEach( w => {
 	w.css_update()
 	w.node.onclick = function() {
-	    w.controls_draw()
+	    widgets.select(w)
 	}
     })
-    $('#message .w-title').onclick = function() { title.controls_draw() }
+    $('#message .w-title').onclick = function() {
+	widgets.select(title)
+    }
 
-    title.controls_draw()
+    widgets.select(title)
 })
 
 function dpi() { // https://stackoverflow.com/a/35941703
@@ -105,7 +123,12 @@ class Widget {
 	this.conf = {}
 	this.is_modified = false
     }
-
+    conf_clone(src = 'conf', dest = 'conf_def') {
+	this[dest] = {}
+	Object.keys(this[src]).forEach( key => {
+	    this[dest][key] = Object.assign({}, this[src][key])
+	})
+    }
     async save() {
 	let conf = Object.assign({}, this.conf)
 	for (let key in conf) {
@@ -149,6 +172,7 @@ class Menu extends Widget {
 		type: 'REG_BINARY'
 	    }
 	}
+	this.conf_clone()
     }
 
     async height(val) {
@@ -239,6 +263,7 @@ class Title extends Menu {
 		type: 'REG_BINARY'
 	    }
 	}
+	this.conf_clone()
     }
 }
 
@@ -253,6 +278,7 @@ class Message extends Menu {
 		type: 'REG_BINARY'
 	    }
 	}
+	this.conf_clone()
     }
     async css_update() {
 	this.css_update_font()
@@ -282,6 +308,7 @@ class StatusBar extends Message {
 		type: 'REG_BINARY'
 	    }
 	}
+	this.conf_clone()
     }
 }
 
@@ -296,6 +323,7 @@ class Scrollbar extends Widget {
 		type: 'REG_SZ'
 	    }
 	}
+	this.conf_clone()
     }
 
     async width(val) {
@@ -343,6 +371,7 @@ class Icons extends Menu {
 		type: "REG_SZ"
 	    }
 	}
+	this.conf_clone()
     }
     async h_spacing(val) {
 	return val ? this.conf.IconSpacing.val = val * -15 : (await this.conf.IconSpacing.val) / -15
