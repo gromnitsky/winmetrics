@@ -33,6 +33,17 @@ document.addEventListener("DOMContentLoaded", function() {
 	    v === widgets.cur ? v.controls_draw() : v.css_update()
 	})
     }
+    $('#export').onclick = () => {
+	fetch('/cgi-bin/registry/export').then(fetcherr).then( r => r.blob())
+	    .then( r => {
+		let url = URL.createObjectURL(r)
+		let a = document.createElement('a')
+		a.download = `winmetrics.${new Date().getTime()}.reg`
+		a.href = url
+		a.click()
+		URL.revokeObjectURL(url)
+	    })
+    }
 
     let registry = new Registry()
     let menu = new Menu($('#notepad__menu'), 'css-global', $('#controls'),

@@ -7,6 +7,8 @@ let url = require('url')
 let child_process = require('child_process')
 let path = require('path')
 let fs = require('fs')
+let {pipeline} = require('stream')
+let os = require('os')
 
 let mime = require('mime')
 
@@ -87,6 +89,16 @@ let server = http.createServer(async function (req, res) {
 	if (!r) return
 	res.setHeader('Content-Type', 'application/json')
 	res.end(JSON.stringify(reg_parse(r)))
+
+    } else if (req.method === "GET"
+	       && u.pathname === '/cgi-bin/registry/export') {
+	let tmp = path.join(os.tmpdir(), `winmetrics-${Math.random()}`)
+	let r = await run_safely('reg', ['export', 'HKCU\\Control Panel\\Desktop\\WindowMetrics', tmp, '/y'])
+	if (!r) return
+	res.setHeader('Content-Type', 'application/octet-stream')
+	pipeline(fs.createReadStream(tmp), res, e => {
+	    fs.unlink(tmp, e => {})
+	})
 
     } else if (req.method === "PUT" && u.pathname === '/cgi-bin/registry/set') {
 	// expect application/x-ndjson
