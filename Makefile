@@ -14,7 +14,7 @@ mkdir = @mkdir -p $(dir $@)
 copy = cp $< $@
 
 all: $(addprefix $(cgi-bin)/, choosefont dpi cygwin1.dll) \
-	$(addprefix $(app)/, $(wildcard index.* web.*))
+	$(addprefix $(app)/, $(wildcard index.html web.mjs *.svg))
 
 define link =
 $(mkdir)

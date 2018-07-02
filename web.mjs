@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let scrollbar = new Scrollbar($('#notepad__scrollbar'),
 				  'css-global', $('#controls'), registry)
     widgets.push(scrollbar)
+    let icons = new Icons($('#icons'), 'css-global', $('#controls'), registry)
+    widgets.push(icons)
 
     widgets.forEach( w => {
 	w.css_update()
@@ -318,6 +320,66 @@ class Scrollbar extends Widget {
     async controls_draw() {
 	this.controls.innerHTML = `<h3>${this.controls_title}</h3>
 <p>Width: <input type="number" min="1" max="200" value="${await this.width()}" step="1" size="4"> px</p>
+`
+	this.css_update()
+	this.controls_activate()
+    }
+}
+
+class Icons extends Menu {
+    constructor(node_qs, style_qs, controls_qs, registry) {
+	super(node_qs, style_qs, controls_qs, registry)
+	this.klass = 'w-icons'
+	this.controls_title = "Icons"
+	this.conf = {
+	    IconFont: {
+		val: this.registry.get('IconFont', "F1FFFFFF0000000000000000000000009001000000000001000000005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		type: 'REG_BINARY'
+	    },
+	    IconSpacing: {
+		val: this.registry.get('IconSpacing', 75 * -15),
+		type: "REG_SZ"
+	    },
+	    IconVerticalSpacing: {
+		val: this.registry.get("IconVerticalSpacing", 75 * -15),
+		type: "REG_SZ"
+	    }
+	}
+    }
+    async h_spacing(val) {
+	return val ? this.conf.IconSpacing.val = val * -15 : (await this.conf.IconSpacing.val) / -15
+    }
+    async v_spacing(val) {
+	return val ? this.conf.IconVerticalSpacing.val = val * -15 : (await this.conf.IconVerticalSpacing.val) / -15
+    }
+    async css_update() {
+	this.css_update_font()
+
+	let r = this.css.rule(`.${this.klass}__icon`)
+	r.style.setProperty('--IconSpacing', `${await this.h_spacing()}px`);
+	r.style.setProperty('--IconVerticalSpacing', `${await this.v_spacing()}px`);
+    }
+    controls_activate() {
+	this.controls.$('button').onclick = (el) => {
+	    this.controls_activate_button(el.target)
+	}
+	this.controls.$('input[name="h_spacing"]').onchange = el => {
+	    this.h_spacing(el.target.value)
+	    this.css_update()
+	    this.is_modified = true
+	}
+	this.controls.$('input[name="v_spacing"]').onchange = el => {
+	    this.v_spacing(el.target.value)
+	    this.css_update()
+	    this.is_modified = true
+	}
+    }
+    async controls_draw() {
+	this.controls.innerHTML = `<h3>${this.controls_title}</h3>
+<p>The rendering is rather approximate.</p>
+<p>Font: <button>${(await this.font()).button()}</button></p>
+<p>Horizontal spacing: <input name="h_spacing" type="number" min="75" max="750" value="${await this.h_spacing()}" step="1" size="4"> px</p>
+<p>Vertical spacing: <input name="v_spacing" type="number" min="75" max="750" value="${await this.v_spacing()}" step="1" size="4"> px</p>
 `
 	this.css_update()
 	this.controls_activate()

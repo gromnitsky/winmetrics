@@ -72,6 +72,38 @@
 	</div>
       </div>
     </div>
+
+    <div id="icons">
+      <div style="display: table-row">
+
+	<div style="display: table-cell">
+	  <div class="w-icons__icon">
+	    <img src='square.svg'>
+	    <div class="w-icons__text">Jack and Jill</div>
+	  </div>
+	</div>
+
+	<div style="display: table-cell">
+	  <div class="w-icons__icon">
+	    <img src='square.svg'>
+	    <div class="w-icons__text">Went up the hill</div>
+	  </div>
+	</div>
+
+      </div>
+
+      <div style="display: table-row">
+
+	<div style="display: table-cell">
+	  <div class="w-icons__icon">
+	    <img src='square.svg'>
+	    <div class="w-icons__text">To fetch a pail of water</div>
+	  </div>
+	</div>
+
+      </div>
+    </div>
+
   </div>
 
   <div id="controls">
@@ -230,6 +262,27 @@
      background: var(--widget-hover-color);
   }
   .w-statusbar__text {}
+
+  #icons {
+    display: table;
+    margin-top: 1em;
+    cursor: pointer;
+  }
+  #icons:hover {
+     background: var(--widget-hover-color);
+  }
+  .w-icons__icon {
+    --IconSpacing: 75px;
+    --IconVerticalSpacing: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: calc(40px + var(--IconSpacing)/2);
+    margin-bottom: calc(var(--IconVerticalSpacing)/4);
+  }
+  .w-icons__text {
+    text-align: center;
+  }
 
   #controls h3 {
     margin: 0 0 0.5em;
