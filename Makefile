@@ -48,6 +48,3 @@ kill:
 $(app)/vendor/node_modules/%: node_modules/%
 	$(mkdir)
 	$(copy)
-
-all: $(addprefix $(app)/vendor/node_modules/, \
-	plain-dialogs/index.mjs)

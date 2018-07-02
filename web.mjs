@@ -1,5 +1,3 @@
-import * as plainDialogs from './vendor/node_modules/plain-dialogs/index.mjs'
-
 document.addEventListener("DOMContentLoaded", function() {
     draw_dpi()
 
@@ -7,12 +5,12 @@ document.addEventListener("DOMContentLoaded", function() {
     let is_modified = () => widgets.some( v => v.is_modified)
 
     $('#exit').onclick = async () => {
-	if (is_modified()) {
-	    if (!await plainDialogs.confirm2("You didn't press 'Save'. Still exit?")) return
-	}
-	fetch('/cgi-bin/exit').then(fetcherr).then( r => r.text()).then( () => {
-	    document.querySelector('body').innerHTML = '<h1>Server has exited. Please close this tab.</h1>'
-	})
+	if (is_modified() && !confirm("You didn't press 'Save'. Still exit?"))
+	    return
+	fetch('/cgi-bin/exit').then(fetcherr).then( r => r.text())
+	    .then( () => {
+		$('body').innerHTML = '<h1>The server has exited. Please close this tab.</h1>'
+	    })
 	return false
     }
     $('#save').onclick = async (el) => {
@@ -201,10 +199,10 @@ class Menu extends Widget {
 	    let menu_item_height = this.node.$(`.${this.klass}__text`).clientHeight
 	    if (menu_item_height > await this.height()) {
 		this.controls.$('input').value = menu_item_height
-		event_trigger(this.controls.$('input'), 'change')
+		event_trigger(this.controls.$('input'), 'input')
 	    }
 	}
-	this.controls.$('input').onchange = el => {
+	this.controls.$('input').oninput = el => {
 	    this.height(el.target.value)
 	    this.css_update()
 	    this.is_modified = true
@@ -310,7 +308,7 @@ class Scrollbar extends Widget {
     }
 
     controls_activate() {
-	this.controls.$('input').onchange = el => {
+	this.controls.$('input').oninput = el => {
 	    this.width(el.target.value)
 	    this.css_update()
 	    this.is_modified = true
@@ -363,12 +361,12 @@ class Icons extends Menu {
 	this.controls.$('button').onclick = (el) => {
 	    this.controls_activate_button(el.target)
 	}
-	this.controls.$('input[name="h_spacing"]').onchange = el => {
+	this.controls.$('input[name="h_spacing"]').oninput = el => {
 	    this.h_spacing(el.target.value)
 	    this.css_update()
 	    this.is_modified = true
 	}
-	this.controls.$('input[name="v_spacing"]').onchange = el => {
+	this.controls.$('input[name="v_spacing"]').oninput = el => {
 	    this.v_spacing(el.target.value)
 	    this.css_update()
 	    this.is_modified = true
