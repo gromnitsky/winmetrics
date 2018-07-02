@@ -46,23 +46,18 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     let registry = new Registry()
-    let menu = new Menu($('#notepad__menu'), 'css-global', $('#controls'),
-			registry)
-    widgets.list.push(menu)
-    let title = new Title($('#notepad__title'), 'css-global', $('#controls'),
-			  registry)
-    widgets.list.push(title)
-    let msg = new Message($('#message__text'), 'css-global', $('#controls'),
-			  registry)
-    widgets.list.push(msg)
-    let statusbar = new StatusBar($('#notepad__statusbar'),
-				  'css-global', $('#controls'), registry)
-    widgets.list.push(statusbar)
-    let scrollbar = new Scrollbar($('#notepad__scrollbar'),
-				  'css-global', $('#controls'), registry)
-    widgets.list.push(scrollbar)
-    let icons = new Icons($('#icons'), 'css-global', $('#controls'), registry)
-    widgets.list.push(icons)
+    let factory = (klass, node) => {
+	let w = new klass(node, 'css-global', $('#controls'), registry)
+	widgets.list.push(w)
+	return w
+    }
+
+    let title = factory(Title, $('#notepad__title'))
+    factory(Menu, $('#notepad__menu'))
+    factory(Message, $('#message__text'))
+    factory(StatusBar, $('#notepad__statusbar'))
+    factory(Scrollbar, $('#notepad__scrollbar'))
+    factory(Icons, $('#icons'))
 
     widgets.list.forEach( w => {
 	w.css_update()
