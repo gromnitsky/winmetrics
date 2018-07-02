@@ -3,6 +3,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<style>
+  body {
+    max-width: 800px;
+    margin: 5px auto;
+  }
+  footer {
+    border-top: 1px solid gray;
+    display: grid;
+    grid-template-areas: "name value text";
+    grid-template-columns: 1fr 1fr 3fr;
+  }
+</style>
+
 <nav>
   <button id="exit">Exit</button>
   <button id="save">Save</button>
@@ -111,32 +124,22 @@
 </main>
 
 <footer>
-  <div id="dpi">
-    <table>
-      <tr>
-	<td>DPI according to Windows:</td><td id="dpi-windows">?</td>
-      </tr>
-      <tr>
-	<td>DPI according to this browser:</td><td id="dpi-browser">?</td>
-      </tr>
-    </table>
+  <div >DPI acc. Windows:</div>
+  <div id="dpi-windows">?</div>
+
+  <div>DPI acc. this browser:</div>
+  <div id="dpi-browser">?</div>
+
+  <div style="grid-area: text; justify-self: end">
+    <a href="https://github.com/gromnitsky/winmetrics">Help!</a>
   </div>
 
-  <div style="text-align: right">
-    Report bugs at <a href="#">http://example.com</a>.
-  </div>
 </footer>
 
 <style id="css-global">
   :root {
-    --body-width: 800px;
     --preview-width: 530px;
     --widget-hover-color: #ffd500;
-  }
-
-  body {
-    max-width: var(--body-width);
-    margin: 5px auto;
   }
 
   main {
