@@ -25,14 +25,13 @@ document.addEventListener("DOMContentLoaded", function() {
 	await Promise.all(widgets.list.map( v => v.save()))
 	el.target.disabled = false
     }
-    $('#reset').onclick = async () => {
+    $('#reset').onclick = () => {
 	if (!confirm("Reset to defaults?")) return
-	await Promise.all(widgets.list.map( async v => {
+	widgets.list.map( v => {
 	    v.conf_clone('conf_def', 'conf')
 	    v.is_modified = true
-	    return v.css_update()
-	}))
-	widgets.cur.controls_draw()
+	    v === widgets.cur ? v.controls_draw() : v.css_update()
+	})
     }
 
     let registry = new Registry()
