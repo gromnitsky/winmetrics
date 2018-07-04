@@ -132,7 +132,7 @@ let server = http.createServer(async function (req, res) {
 
     } else if (req.method === "GET" && !/^\/cgi-bin/.test(u.pathname)) {
 	if (/^\/+$/.test(u.pathname)) u.pathname = '/index.html'
-	let fname = path.join(public_root, path.normalize(u.pathname))
+	let fname = path.join(public_root, 'client', path.normalize(u.pathname))
 
 	fs.stat(fname, (e, stats) => {
 	    if (e) {

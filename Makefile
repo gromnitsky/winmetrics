@@ -4,47 +4,69 @@ LD := $(target)-ld
 AS := $(target)-as
 out := _out.$(target)
 cache := $(out)/.cache
-app := $(out)/app
-cgi-bin := $(app)/cgi-bin
 
 LDFLAGS := -mwindows -mconsole
 CFLAGS := -Wall
 
+server := $(out)/app
+client := $(server)/client
+cgi-bin := $(server)/cgi-bin
+
 mkdir = @mkdir -p $(dir $@)
 copy = cp $< $@
 
-all: $(addprefix $(cgi-bin)/, choosefont dpi cygwin1.dll) \
-	$(addprefix $(app)/, $(wildcard index.html web.mjs *.svg))
+node := $(server)/node.exe
+node_modules := $(server)/package.json
 
-define link =
-$(mkdir)
-$(LINK.c) $^ -o $@
-endef
+all: $(node) $(node_modules) \
+	$(addprefix $(cgi-bin)/, choosefont dpi cygwin1.dll) \
+	$(addprefix $(server)/, server.js runme.js) \
+	$(addprefix $(client)/, index.html web.mjs square.svg)
+
+# 32bit
+$(node): ~/projects/node.exe
+	$(mkdir)
+	$(copy)
+
+$(node_modules): package.json
+	$(mkdir)
+	$(copy)
+	cd $(dir $@) && npm i --no-package-lock --no-bin-links --only=prod --no-audit
 
 $(cgi-bin)/%: $(cache)/%.o
-	$(link)
+	$(mkdir)
+	$(LINK.c) $^ -o $@
 
 $(cache)/%.o: %.c
 	$(mkdir)
 	$(COMPILE.c) $< -o $@
 
+# i686
 $(cgi-bin)/cygwin1.dll:
 	cp /cygdrive/c/cygwin/bin/cygwin1.dll $@
 
-$(app)/%: %
+$(client)/%: %
+	$(mkdir)
+	$(copy)
+
+$(server)/%: %
 	$(mkdir)
 	$(copy)
 
 
 
 server: kill all
-	node server.js $(app) &
+	cd $(server) && ./node server.js . &
 
 kill:
-	-pkill -f 'node.exe. server.js'
+	-pkill -f 'node.exe server.js'
 
 
 
-$(app)/vendor/node_modules/%: node_modules/%
+zip := $(out)/$(shell json -ad- name version < package.json).zip
+
+$(zip): all
 	$(mkdir)
-	$(copy)
+	cd $(server) && zip $(CURDIR)/$@ -qr *
+
+zip: $(zip)

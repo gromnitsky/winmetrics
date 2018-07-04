@@ -1,8 +1,7 @@
 {
+    "private": true,
     "name": "winmetrics",
     "version": "0.0.1",
-    "description": "",
-    "main": "server.js",
     "author": "Alexander Gromnitsky",
     "license": "MIT",
     "dependencies": {
