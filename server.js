@@ -80,9 +80,10 @@ let server = http.createServer(async function (req, res) {
 
     let u = url.parse(req.url, true)
     if (req.method === "GET" && u.pathname === '/cgi-bin/exit') {
-	log('cheerio')
-	res.end()
-	process.exit(0)
+	res.end('cheerio', () => {
+	    log('finito')
+	    setTimeout(() => { process.exit(0) }, 1)
+	})
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
 	let r = await run_safely('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])

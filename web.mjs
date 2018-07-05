@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     $('#exit').onclick = async () => {
 	if (is_modified() && !confirm("You didn't press 'Save'. Still exit?"))
 	    return
-	await fetch('/cgi-bin/exit').then(fetcherr)
+	await fetch('/cgi-bin/exit').then(fetcherr).then( r => r.text())
 	$('body').innerHTML = '<h1>The server has exited. Please close this tab.</h1>'
     }
     $('#save').onclick = async (el) => {
