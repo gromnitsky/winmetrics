@@ -23,7 +23,9 @@ document.addEventListener("DOMContentLoaded", function() {
 	el.target.disabled = false
     }
     $('#reset').onclick = () => {
-	if (!confirm("Reset to defaults?")) return
+	if (!confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
+
+Reset to the values we've obtained during the program startup?`)) return
 	widgets.list.map( v => {
 	    v.conf_clone('conf_def', 'conf')
 	    v.is_modified = true
@@ -132,13 +134,19 @@ class Widget {
 	})
     }
     async save() {
-	let conf = Object.assign({}, this.conf)
-	for (let key in conf) {
-	    conf[key].val = await conf[key].val
-	    // TODO
-	    console.log('saving', key)
-	}
-	this.is_modified = false
+	let ndjson = (await Promise.all(Object.entries(this.conf)
+					.map( async ([k,v]) => {
+					    return JSON.stringify({
+						key: k,
+						type: v.type,
+						val: await v.val
+					    })
+					}))).join`\n`
+
+	return fetch('/cgi-bin/registry/set', {
+	    method: 'put',
+	    body: ndjson
+	}).then(fetcherr).then( () => {	this.is_modified = false })
     }
 }
 
