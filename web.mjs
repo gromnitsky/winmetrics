@@ -163,7 +163,7 @@ class Logfont {
 	}
     }
     button() {
-	return `${this.cf[1]}, ${parseFloat(this.cf[4])}pt, ${this.cf[5]}px`
+	return `${this.cf[1]}, ${parseFloat(this.cf[4])}pt`
     }
 }
 
@@ -206,7 +206,7 @@ class Menu extends Widget {
 	r.style.fontFamily = font.name
 	r.style.fontWeight = font.weight
 	r.style.fontStyle = Number(font.italic) ? 'italic' : 'normal'
-	r.style.fontSize = `${font.size_pixels}px`
+	r.style.fontSize = `${font.size_points}pt`
     }
 
     async css_update() {

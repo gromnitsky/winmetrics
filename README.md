@@ -12,7 +12,7 @@ you're actually editing.
 
 Behold winmetrics:
 
-![a screenshot](https://ultraimg.com/images/2018/07/06/O2dx.png)
+![a screenshot](https://ultraimg.com/images/2018/07/06/O2cH.png)
 
 Hovering over & clicking on a desired gui widget brings its relevant
 options.
