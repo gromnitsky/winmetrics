@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	el.target.disabled = true
 	await Promise.all(widgets.list.map( v => v.save()))
 	el.target.disabled = false
+	alert('You ought to logoff & logon again for the changes to take effect')
     }
     $('#reset').onclick = () => {
 	if (!confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
