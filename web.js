@@ -59,6 +59,8 @@ Reset to the values we've obtained during the program startup?`)) return
 	    URL.revokeObjectURL(url)
 	})
     }
+
+    draw_dpi()
 }
 
 class Registry {
@@ -383,4 +385,19 @@ class Icons extends Title {
 	    this.is_modified = true
 	}
     }
+}
+
+function draw_dpi() {
+    $('#dpi-browser').innerText = dpi()
+    efetch('/cgi-bin/dpi').then( r => r.text())
+	.then( r => $('#dpi-windows').innerText = r)
+}
+
+function dpi() { // https://stackoverflow.com/a/35941703
+    function findFirstPositive(b, a, i, c) {
+	c=(d,e)=>e>=d?(a=d+(e-d)/2,0<b(a)&&(a==d||0>=b(a-1))?a:0>=b(a)?c(a+1,e):c(d,a-1)):-1
+	for (i = 1; 0 >= b(i);) i *= 2
+	return c(i / 2, i)|0
+    }
+    return findFirstPositive(x => matchMedia(`(max-resolution: ${x}dpi)`).matches)
 }
