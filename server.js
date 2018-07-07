@@ -131,6 +131,10 @@ let server = http.createServer(async function (req, res) {
 	res.setHeader('Content-Type', 'text/plain')
 	res.end(await run_safely('cgi-bin/dpi'))
 
+    } else if (req.method === "GET" && u.pathname === '/cgi-bin/meta') {
+	res.setHeader('Content-Type', 'application/json')
+	res.end(JSON.stringify(require('./package')))
+
     } else if (req.method === "GET" && !/^\/cgi-bin/.test(u.pathname)) {
 	if (/^\/+$/.test(u.pathname)) u.pathname = '/index.html'
 	let fname = path.join(public_root, 'client', path.normalize(u.pathname))

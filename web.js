@@ -60,7 +60,7 @@ Reset to the values we've obtained during the program startup?`)) return
 	})
     }
 
-    draw_dpi()
+    draw_footer()
 }
 
 class Registry {
@@ -387,10 +387,14 @@ class Icons extends Title {
     }
 }
 
-function draw_dpi() {
-    $('#dpi-browser').innerText = dpi()
+async function draw_footer() {
     efetch('/cgi-bin/dpi').then( r => r.text())
-	.then( r => $('#dpi-windows').innerText = r)
+	.then( r => $('#dpi__windows').innerText = r.trim())
+    $('#dpi__browser').innerText = dpi()
+
+    let r = await efetch('/cgi-bin/meta').then( r => r.json())
+    $('#meta__homepage').href = r.homepage
+    $('#meta__version').innerText = 'v' + r.version
 }
 
 function dpi() { // https://stackoverflow.com/a/35941703

@@ -9,10 +9,15 @@
     margin: 5px auto;
   }
   footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
     border-top: 1px solid gray;
+  }
+  footer #dpi {
     display: grid;
-    grid-template-areas: "name value text";
-    grid-template-columns: 1fr 1fr 3fr;
+    grid-template-areas: "name value";
+    grid-column-gap: 1em;
   }
 </style>
 
@@ -124,16 +129,18 @@
 </main>
 
 <footer>
-  <div >DPI acc. Windows:</div>
-  <div id="dpi-windows">?</div>
+  <div id="dpi">
+    <div>DPI acc. Windows:</div>
+    <div id="dpi__windows">?</div>
 
-  <div>DPI acc. this browser:</div>
-  <div id="dpi-browser">?</div>
-
-  <div style="grid-area: text; justify-self: end">
-    <a href="https://github.com/gromnitsky/winmetrics" target="_blank">Help</a>
+    <div>DPI acc. this browser:</div>
+    <div id="dpi__browser">?</div>
   </div>
 
+  <div id="meta">
+    <a id="meta__homepage" href="?" target="_blank">Help</a>
+    <p id="meta__version">?</p>
+  </div>
 </footer>
 
 <style id="css-global">

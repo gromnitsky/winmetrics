@@ -1,8 +1,9 @@
 {
     "private": true,
     "name": "winmetrics",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "author": "Alexander Gromnitsky",
+    "homepage": "https://github.com/gromnitsky/winmetrics",
     "license": "MIT",
     "dependencies": {
         "mime": "~2.3.1"
