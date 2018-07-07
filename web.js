@@ -37,16 +37,15 @@ async function main() {
     $('#save').onclick = async el => {
 	el.target.disabled = true
 	await registry.save()
+	widgets.not_modified()
 	el.target.disabled = false
 	alert('You ought to logoff & logon again for the changes to take effect')
     }
     $('#reset').onclick = () => {
-// 	if (!confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
+ 	if (!confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
 
-// Reset to the values we've obtained during the program startup?`)) return
-//	console.log(registry.cur.CaptionHeight)
+Reset to the values we've obtained during the program startup?`)) return
 	registry.assign('cur', 'orig')
-//	console.log(registry.cur.CaptionHeight)
 	widgets.redraw()
 	widgets.cur.controls_draw()
     }
@@ -113,6 +112,10 @@ class Registry {
 	let reg = await efetch('/cgi-bin/registry/get').then( r => r.json())
 	this.assign('cur', 'def')
 	Object.assign(this.cur, reg)
+	// filter out entries from this.cur that don't exist in this.def
+	this.cur = Object.assign({}, ...Object.keys(this.cur).filter( k => {
+	    return k in this.def
+	}).map( k => ({[k]: this.cur[k]})))
 
 	// resolve all *Font keys
 	let fonts = Object.keys(this.cur).filter( k => k.match(/.+Font$/))
@@ -120,12 +123,26 @@ class Registry {
 	    this.cur[k].lf = new Logfont(await efetch(`/cgi-bin/logfont?v=${this.cur[k].val}`).then( r => r.text()))
 	}))
 
-	this.assign('orig', 'cur')
+	this.assign('orig', 'cur') // save the obtained values for the Reset btn
     }
     assign(dest, src) {
 	this[dest] = {}
 	Object.keys(this[src]).forEach( key => {
 	    this[dest][key] = Object.assign({}, this[src][key])
+	})
+    }
+    save() {
+	let ndjson = Object.entries(this.cur)
+	    .map( ([k,v]) => {
+		return JSON.stringify({
+		    key: k,
+		    type: v.type,
+		    val: v.val
+		})
+	    }).join`\n`
+	return efetch('/cgi-bin/registry/set', {
+	    method: 'put',
+	    body: ndjson
 	})
     }
 }
@@ -174,6 +191,7 @@ class Widgets {
 	this.cur = w
     }
     is_modified() { return this.list.some( v => v.is_modified) }
+    not_modified() { return this.list.forEach( v => v.is_modified = false) }
     redraw() { this.list.forEach( w => w.css_update()) }
 }
 
