@@ -3,12 +3,13 @@
 document.addEventListener('DOMContentLoaded', main)
 
 async function main() {
-    let reg = await reg_load()
+    let registry = new Registry()
+    await registry.load()
     let css = new CSS('css-global')
     let widgets = new Widgets()
 
     let factory = (klass, node) => {
-	let w = new klass(node, $('#controls'), css, reg)
+	let w = new klass(node, $('#controls'), css, registry)
 	widgets.add(w)
 	w.node.onclick = function() {
 	    widgets.select(w)
@@ -19,23 +20,114 @@ async function main() {
     let title = factory(Title, $('#notepad__title'))
     factory(Menu, $('#notepad__menu'))
     factory(Message, $('#message__text'))
+    factory(StatusBar, $('#notepad__statusbar'))
+    factory(Scrollbar, $('#notepad__scrollbar'))
+    factory(Icons, $('#icons'))
 
+    $('#message .w-title').onclick = function() { widgets.select(title) }
     widgets.redraw()
     widgets.select(title)
 
-    $('#save').onclick = el => {
-	console.log(reg)
+    $('#exit').onclick = async () => {
+	if (widgets.is_modified()
+	    && !confirm("You didn't press 'Save'. Still exit?")) return
+	await efetch('/cgi-bin/exit').then( r => r.text())
+	$('body').innerHTML = '<h1>The server has exited. Please close this tab.</h1>'
+    }
+    $('#save').onclick = async el => {
+	el.target.disabled = true
+	await registry.save()
+	el.target.disabled = false
+	alert('You ought to logoff & logon again for the changes to take effect')
+    }
+    $('#reset').onclick = () => {
+// 	if (!confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
+
+// Reset to the values we've obtained during the program startup?`)) return
+//	console.log(registry.cur.CaptionHeight)
+	registry.assign('cur', 'orig')
+//	console.log(registry.cur.CaptionHeight)
+	widgets.redraw()
+	widgets.cur.controls_draw()
+    }
+    $('#export').onclick = () => {
+	efetch('/cgi-bin/registry/export').then( r => r.blob()).then( r => {
+	    let url = URL.createObjectURL(r)
+	    let a = document.createElement('a')
+	    a.download = `winmetrics.${new Date().getTime()}.reg`
+	    a.href = url
+	    a.click()
+	    URL.revokeObjectURL(url)
+	})
     }
 }
 
-async function reg_load() {
-    let reg = await efetch('/cgi-bin/registry/get').then( r => r.json())
-    // resolve all *Font keys
-    let fonts = Object.keys(reg).filter( k => k.match(/.+Font$/))
-    await Promise.all(fonts.map( async k => {
-	reg[k].lf = new Logfont(await efetch(`/cgi-bin/logfont?v=${reg[k].val}`).then( r => r.text()))
-    }))
-    return reg
+class Registry {
+    constructor() {
+	this.cur = {}
+	this.orig = {}
+	this.def = {
+	    CaptionHeight: {
+		val: 22 * -15,
+		type: 'REG_SZ'
+	    },
+	    CaptionFont: {
+		val: 'F4FFFFFF0000000000000000000000009001000000000001000005005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+		type: 'REG_BINARY'
+	    },
+	    MenuHeight: {
+		val: 19 * -15,
+		type: 'REG_SZ'
+	    },
+	    MenuFont: {
+		val: 'F4FFFFFF0000000000000000000000009001000000000001000005005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+		type: 'REG_BINARY'
+	    },
+	    MessageFont: {
+		val: 'F4FFFFFF0000000000000000000000009001000000000001000005005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+		type: 'REG_BINARY'
+	    },
+	    StatusFont: {
+		val: 'F4FFFFFF0000000000000000000000009001000000000001000005005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+		type: 'REG_BINARY'
+	    },
+	    ScrollWidth: {
+		val: 17 * -15,
+		type: 'REG_SZ'
+	    },
+	    IconFont: {
+		val: 'F4FFFFFF0000000000000000000000009001000000000001000005005300650067006F006500200055004900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+		type: 'REG_BINARY'
+	    },
+	    IconSpacing: {
+		val: 75 * -15,
+		type: "REG_SZ"
+	    },
+	    IconVerticalSpacing: {
+		val: 75 * -15,
+		type: "REG_SZ"
+	    }
+	}
+    }
+    async load() {
+	let reg = await efetch('/cgi-bin/registry/get').then( r => r.json())
+	this.assign('cur', 'def')
+	Object.assign(this.cur, reg)
+
+	// resolve all *Font keys
+	let fonts = Object.keys(this.cur).filter( k => k.match(/.+Font$/))
+	await Promise.all(fonts.map( async k => {
+	    this.cur[k].lf = new Logfont(await efetch(`/cgi-bin/logfont?v=${this.cur[k].val}`).then( r => r.text()))
+	}))
+
+	this.assign('orig', 'cur')
+    }
+    assign(dest, src) {
+	this[dest] = {}
+	Object.keys(this[src]).forEach( key => {
+	    this[dest][key] = Object.assign({}, this[src][key])
+	})
+    }
 }
 
 function efetch(url, opt) {
@@ -93,22 +185,22 @@ class Widget {
 	this.node = node
 	this.node_controls = node_controls
 	this.css = css
-	this.reg = reg
+	this.reg = () => reg.cur
 
 	this.is_modified = false
     }
     opt_num(name, new_value) {
-	let o = this.reg[name]
+	let o = this.reg()[name]
 	// FIXME: is this DPI aware?
 	return new_value ? o.val = new_value * -15 : o.val / -15
     }
     opt_font(name, new_value) {
 	if (new_value) {
 	    let lf = new Logfont(new_value)
-	    this.reg[name].val = lf.hex()
-	    return this.reg[name].lf = lf
+	    this.reg()[name].val = lf.hex()
+	    return this.reg()[name].lf = lf
 	}
-	return this.reg[name].lf
+	return this.reg()[name].lf
     }
     controls_draw() {}		// override it
     css_update_font() {
@@ -196,6 +288,81 @@ class Message extends Title {
     controls_activate() {
 	this.node_controls.$('button').onclick = el => {
 	    this.controls_activate_font_button(el.target)
+	}
+    }
+}
+
+class StatusBar extends Message {
+    constructor(node, node_controls, css, reg) {
+	super(node, node_controls, css, reg)
+	this.klass = 'w-statusbar'
+	this.h3 = 'Status bar'
+	this.o_font = 'StatusFont'
+    }
+}
+
+class Scrollbar extends Widget {
+    constructor(node, node_controls, css, reg) {
+	super(node, node_controls, css, reg)
+	this.klass = 'w-scrollbar'
+	this.h3 = 'Scrollbar'
+    }
+    css_update() {
+	let r = this.css.rule(`.${this.klass}`)
+	r.style.width = `${this.opt_num('ScrollWidth')}px`
+    }
+    controls_draw() {
+	this.node_controls.innerHTML = `<h3>${this.h3}</h3>
+<p>Width: <input type="number" min="3" max="200" value="${this.opt_num('ScrollWidth')}" step="1" size="4"> px</p>
+`
+	this.controls_activate()
+    }
+    controls_activate() {
+	this.node_controls.$('input').oninput = el => {
+	    this.opt_num('ScrollWidth', el.target.value)
+	    this.css_update()
+	    this.is_modified = true
+	}
+    }
+}
+
+class Icons extends Title {
+    constructor(node, node_controls, css, reg) {
+	super(node, node_controls, css, reg)
+	this.klass = 'w-icons'
+	this.h3 = 'Icons'
+	this.o_font = 'IconFont'
+    }
+    css_update() {
+	this.css_update_font()
+
+	let r = this.css.rule(`.${this.klass}__icon`)
+	r.style.setProperty('--IconSpacing', `${this.opt_num('IconSpacing')}px`)
+	r.style.setProperty('--IconVerticalSpacing', `${this.opt_num('IconVerticalSpacing')}px`)
+    }
+    controls_draw() {
+	this.node_controls.innerHTML = `<h3>${this.h3}</h3>
+<p>The rendering is rather approximate.</p>
+<p>Font: <button>${(this.opt_font(this.o_font))}</button></p>
+<p>Horizontal spacing: <input name="h_spacing" type="number" min="75" max="750" value="${this.opt_num('IconSpacing')}" step="1" size="4"> px</p>
+<p>Vertical spacing: <input name="v_spacing" type="number" min="75" max="750" value="${this.opt_num('IconVerticalSpacing')}" step="1" size="4"> px</p>
+`
+	this.css_update()
+	this.controls_activate()
+    }
+    controls_activate() {
+	this.node_controls.$('button').onclick = el => {
+	    this.controls_activate_font_button(el.target)
+	}
+	this.node_controls.$('input[name="h_spacing"]').oninput = el => {
+	    this.opt_num('IconSpacing', el.target.value)
+	    this.css_update()
+	    this.is_modified = true
+	}
+	this.node_controls.$('input[name="v_spacing"]').oninput = el => {
+	    this.opt_num('IconVerticalSpacing', el.target.value)
+	    this.css_update()
+	    this.is_modified = true
 	}
     }
 }
