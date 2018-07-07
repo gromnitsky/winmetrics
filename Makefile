@@ -20,7 +20,7 @@ node_modules := $(server)/package.json
 all := $(node) $(node_modules) \
 	$(addprefix $(cgi-bin)/, choosefont dpi cygwin1.dll) \
 	$(addprefix $(server)/, server.js runme.js) \
-	$(addprefix $(client)/, index.html web.mjs square.svg)
+	$(addprefix $(client)/, index.html web.js square.svg)
 
 all: $(all)
 
