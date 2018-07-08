@@ -26,7 +26,6 @@ the browser tab.
 
 ## Bugs
 
-* The Export btn works in Chrome only.
 * Edge may report -1 DPI.
 * I'm not sure about the math in calculating the pixel size of the
   selected font. All the docs about Logfont point back to the 90s.

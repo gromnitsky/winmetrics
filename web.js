@@ -49,14 +49,19 @@ Reset to the values we've obtained during the program startup?`)) return
 	widgets.redraw()
 	widgets.cur.controls_draw()
     }
+    let export_url
     $('#export').onclick = () => {
 	efetch('/cgi-bin/registry/export').then( r => r.blob()).then( r => {
-	    let url = URL.createObjectURL(r)
+	    if (export_url) URL.revokeObjectURL(export_url)
+
+	    export_url = URL.createObjectURL(r)
 	    let a = document.createElement('a')
 	    a.download = `winmetrics.${new Date().getTime()}.reg`
-	    a.href = url
+	    a.href = export_url
+	    a.style.display = 'none'
+	    document.body.appendChild(a) // firefox
 	    a.click()
-	    URL.revokeObjectURL(url)
+	    document.body.removeChild(a)
 	})
     }
 
