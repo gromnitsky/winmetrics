@@ -1,5 +1,6 @@
 'use strict';
 
+ping()
 document.addEventListener('DOMContentLoaded', main)
 
 async function main() {
@@ -28,26 +29,22 @@ async function main() {
     widgets.redraw()
     widgets.select(title)
 
-    $('#exit').onclick = async () => {
-	if (widgets.is_modified()
-	    && !confirm("You didn't press 'Save'. Still exit?")) return
-	await efetch('/cgi-bin/exit').then( r => r.text())
-	$('body').innerHTML = '<h1>The server has exited. Please close this tab.</h1>'
-    }
     $('#save').onclick = async el => {
 	el.target.disabled = true
 	await registry.save()
 	widgets.not_modified()
 	el.target.disabled = false
-	alert('You ought to logoff & logon again for the changes to take effect')
+	plainDialogs.alert('You ought to logoff & logon again for the changes to take effect')
     }
     $('#reset').onclick = () => {
- 	if (!confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
+        plainDialogs.confirm(`We can't reset to the real "defaults" for w10 has a diff set of the "defaults" for each DPI.
 
-Reset to the values we've obtained during the program startup?`)) return
-	registry.assign('cur', 'orig')
-	widgets.redraw()
-	widgets.cur.controls_draw()
+Reset to the values we've obtained during the program startup?`)
+            .then( () => {
+                registry.assign('cur', 'orig')
+                widgets.redraw()
+                widgets.cur.controls_draw()
+            })
     }
     let export_url
     $('#export').onclick = () => {
@@ -409,4 +406,26 @@ function dpi() { // https://stackoverflow.com/a/35941703
 	return c(i / 2, i)|0
     }
     return findFirstPositive(x => matchMedia(`(max-resolution: ${x}dpi)`).matches)
+}
+
+function ping(debug, backoff = Infinity) {
+    const DELAY_DEFAULT = 3     // seconds
+    const BACKOFF_START = 2
+    let delay
+
+    efetch('/cgi-bin/ping').then( r => r.text()).then( r => {
+        if (debug) console.log(r)
+        document.querySelector('#server_status').classList.add('live')
+        delay = DELAY_DEFAULT
+        backoff = BACKOFF_START
+
+    }).catch( () => {
+        if (backoff > 5) backoff = BACKOFF_START
+        delay = Math.pow(2, backoff++)
+        document.querySelector('#server_status').classList.remove('live')
+
+    }).finally( () => {
+        if (debug) console.log(`next ping in ${delay} sec`)
+        setTimeout( () => ping(debug, backoff), delay*1000)
+    })
 }

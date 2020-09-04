@@ -59,6 +59,33 @@ let reg_add = async function(query) {
 		       '/v', query.key, '/t', query.type, '/d', query.val])
 }
 
+let ServerPollingNew = function(callback, opt) {
+    callback = callback || (() => {
+        console.error('Exiting due to the lack of requests')
+        process.exit(0)
+    })
+    opt = opt || {}; Object.assign(opt, {
+        interval: 3,
+        timeout: 9,
+    })
+
+    let last
+    let timer_id
+
+    let start = () => {
+        if (last && Date.now() - last > opt.timeout*1000)
+            setTimeout(callback, 1)
+        timer_id = setTimeout(start, opt.interval*1000)
+    }
+    let ping = () => {
+        if (!last) timer_id = start()
+        last = Date.now()
+    }
+    let pong = () => last
+
+    return { ping, pong, timer_id }
+}
+
 
 if (process.argv.length < 3) {
     console.error("Usage: server.js public_dir")
@@ -66,8 +93,10 @@ if (process.argv.length < 3) {
 }
 process.chdir(process.argv[2])
 let public_root = fs.realpathSync(process.cwd())
+let server_polling = ServerPollingNew()
 
 let server = http.createServer(async function (req, res) {
+    server_polling.ping()
     let log = console.error.bind(console, `${req.method} ${req.url}:`)
     let err = (code, msg) => {
 	try { res.statusCode = code } catch (e) { log(code, e.message) }
@@ -84,6 +113,9 @@ let server = http.createServer(async function (req, res) {
 	    log('finito')
 	    setTimeout(() => { process.exit(0) }, 1)
 	})
+
+    } else if (req.method === "GET" && u.pathname === '/cgi-bin/ping') {
+        res.end(`pong ${server_polling.pong()}\n`)
 
     } else if (req.method === "GET" && u.pathname === '/cgi-bin/registry/get') {
 	let r = await run_safely('reg', ['query', 'HKCU\\Control Panel\\Desktop\\WindowMetrics'])

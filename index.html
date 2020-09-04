@@ -3,10 +3,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link rel="stylesheet" href="node_modules/dialog-polyfill/dialog-polyfill.css">
 <style>
   body {
     max-width: 800px;
     margin: 5px auto;
+  }
+  nav {
+    display: inline-grid;
+    grid-auto-flow: column;
+    column-gap: 5px;
   }
   footer {
     display: flex;
@@ -19,10 +25,19 @@
     grid-template-areas: "name value";
     grid-column-gap: 1em;
   }
+
+  .live { background: green !important; }
+  #server_status {
+    height: 1em;
+    width: 1em;
+    background: red;
+    border-radius: 50%;
+    align-self: center;
+  }
 </style>
 
 <nav>
-  <button id="exit">Exit</button>
+  <div id="server_status"></div>
   <button id="save">Save</button>
   <button id="reset">Reset</button>
   <button id="export">Export</button>
@@ -301,4 +316,6 @@
   }
 </style>
 
+<script src="node_modules/dialog-polyfill/dialog-polyfill.js"></script>
+<script src="node_modules/plain-dialogs/dist/plain-dialogs.js"></script>
 <script src="web.js"></script>
