@@ -29,7 +29,6 @@ the server process will auto-exit after a couple of sec.
 
 ## Bugs
 
-* An old, non-chromium based Edge is unsupported.
 * I'm not sure about the math in calculating the pixel size of the
   selected font. All the docs about Logfont point back to the 90s.
 * If anything goes wrong, the util won't tell you a thing until you
